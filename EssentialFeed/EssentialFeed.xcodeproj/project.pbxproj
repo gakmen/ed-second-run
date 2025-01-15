@@ -25,22 +25,9 @@
 		72E38E812D384B1C00469630 /* EssentialFeedTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EssentialFeedTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		72E38E892D384B1C00469630 /* Exceptions for "EssentialFeed" folder in "EssentialFeed" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			publicHeaders = (
-				EssentialFeed.h,
-			);
-			target = 72E38E782D384B1C00469630 /* EssentialFeed */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		72E38E7B2D384B1C00469630 /* EssentialFeed */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				72E38E892D384B1C00469630 /* Exceptions for "EssentialFeed" folder in "EssentialFeed" target */,
-			);
 			path = EssentialFeed;
 			sourceTree = "<group>";
 		};
