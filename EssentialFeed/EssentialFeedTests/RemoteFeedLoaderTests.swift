@@ -13,8 +13,8 @@ struct RemoteFeedLoaderTests {
     let url = URL(string: "https://a-given-url.ru")!
     let (sut, client) = makeSUT(url: url)
 
-    sut.load()
-    
+    try? sut.load()
+
     #expect(client.requestedURLs == [url])
   }
 
@@ -22,10 +22,24 @@ struct RemoteFeedLoaderTests {
     let url = URL(string: "https://a-given-url.ru")!
     let (sut, client) = makeSUT(url: url)
 
-    sut.load()
-    sut.load()
+    try? sut.load()
+    try? sut.load()
 
     #expect(client.requestedURLs == [url, url])
+  }
+
+  @Test func load_deliversConnectivityErrorOnClientError() {
+    let (sut, client) = makeSUT()
+    client.error = NSError(domain: "Test", code: 0)
+
+    var capturedError: RemoteFeedLoader.Error?
+    do {
+      try sut.load()
+    } catch {
+      capturedError = error as? RemoteFeedLoader.Error
+    }
+
+    #expect(capturedError == .connectivity)
   }
 
   // MARK: - Helpers
@@ -40,9 +54,11 @@ struct RemoteFeedLoaderTests {
 
   class HTTPClientSpy: HTTPClient {
     var requestedURLs = [URL]()
+    var error: Error?
 
-    func get(from url: URL) {
+    func get(from url: URL) throws {
       requestedURLs.append(url)
+      if let error { throw error }
     }
   }
 

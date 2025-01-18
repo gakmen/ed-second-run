@@ -1,7 +1,7 @@
 import Foundation
 
 public protocol HTTPClient {
-  func get(from url: URL)
+  func get(from url: URL) throws
 }
 
 public final class RemoteFeedLoader {
@@ -13,7 +13,15 @@ public final class RemoteFeedLoader {
     self.client = client
   }
 
-  public func load() {
-    client.get(from: url)
+  public func load() throws {
+    do {
+      try client.get(from: url)
+    } catch {
+      throw Error.connectivity
+    }
+  }
+
+  public enum Error: Swift.Error {
+    case connectivity
   }
 }
