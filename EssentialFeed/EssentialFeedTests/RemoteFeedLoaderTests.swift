@@ -28,18 +28,40 @@ struct RemoteFeedLoaderTests {
     #expect(client.requestedURLs == [url, url])
   }
 
-  @Test func load_deliversConnectivityErrorOnClientError() {
-    let (sut, client) = makeSUT()
-    client.error = NSError(domain: "Test", code: 0)
+  @Test func load_deliversErrorOnClientError() {
+    let (sut, _) = makeSUT()
 
     var capturedErrors = [RemoteFeedLoader.Error]()
     do {
       try sut.load()
     } catch let error as RemoteFeedLoader.Error {
-      capturedErrors.append(error )
+      capturedErrors.append(error)
     } catch {}
 
     #expect(capturedErrors == [.connectivity])
+  }
+
+  @Test(arguments: [199, 201, 300, 400, 500])
+  func load_deliversErrorOnNon200HTTPResponse(code: Int) {
+    let url = URL(string: "https://a-given-url.ru")!
+    let (sut, client) = makeSUT(url: url)
+    client.responses.append(
+      HTTPURLResponse(
+        url: url,
+        statusCode: code,
+        httpVersion: nil,
+        headerFields: nil
+      )!
+    )
+
+    var capturedErrors = [RemoteFeedLoader.Error]()
+    do {
+      try sut.load()
+    } catch let error as RemoteFeedLoader.Error {
+      capturedErrors.append(error)
+    } catch {}
+
+    #expect(capturedErrors == [.invalidData])
   }
 
   // MARK: - Helpers
@@ -54,11 +76,14 @@ struct RemoteFeedLoaderTests {
 
   class HTTPClientSpy: HTTPClient {
     var requestedURLs = [URL]()
-    var error: Error?
+    var responses = [HTTPURLResponse]()
 
-    func get(from url: URL) throws {
+    func get(from url: URL) throws -> HTTPURLResponse {
       requestedURLs.append(url)
-      if let error { throw error }
+      guard let firstResponse = responses.first else {
+        throw NSError(domain: "HTTPClientSpy error", code: 0)
+      }
+      return firstResponse
     }
   }
 
