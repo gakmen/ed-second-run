@@ -32,14 +32,14 @@ struct RemoteFeedLoaderTests {
     let (sut, client) = makeSUT()
     client.error = NSError(domain: "Test", code: 0)
 
-    var capturedError: RemoteFeedLoader.Error?
+    var capturedErrors = [RemoteFeedLoader.Error]()
     do {
       try sut.load()
-    } catch {
-      capturedError = error as? RemoteFeedLoader.Error
-    }
+    } catch let error as RemoteFeedLoader.Error {
+      capturedErrors.append(error )
+    } catch {}
 
-    #expect(capturedError == .connectivity)
+    #expect(capturedErrors == [.connectivity])
   }
 
   // MARK: - Helpers
