@@ -6,7 +6,7 @@ struct RemoteFeedLoaderTests {
   @Test func init_doesNotRequestDataFromURL() {
     let (_, client) = makeSUT()
 
-    #expect(client.requestedURLs == [])
+    #expect(client.requestedURLs.isEmpty)
   }
 
   @Test func load_requestsDataFromURL() {
