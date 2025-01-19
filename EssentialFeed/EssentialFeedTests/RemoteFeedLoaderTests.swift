@@ -72,6 +72,27 @@ struct RemoteFeedLoaderTests {
     #expect(capturedResult == [.success([])])
   }
 
+  @Test func load_deliversFeedItemsOn200HTTPResponseWithValidJSON() {
+    let (sut, client) = makeSUT()
+    let item1 = makeItem(id: UUID(), imageURL: URL(string: "https://image1.ru")!)
+    let item2 = makeItem(
+      id: UUID(),
+      description: "a description",
+      location: "a location",
+      imageURL: URL(string: "https://image2.ru")!
+    )
+    let itemsJSON = makeItemsJSON([item1.json, item2.json])
+    client.stubResponse(
+      makeResponse(from: someURL, and: 200),
+      itemsJSON
+    )
+
+    let capturedResult = loadAndCaptureResult(for: sut)
+    let items = [item1.model, item2.model]
+
+    #expect(capturedResult == [.success(items)])
+  }
+
   // MARK: - Helpers
 
   private func makeSUT(

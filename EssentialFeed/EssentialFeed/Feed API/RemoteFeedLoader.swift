@@ -25,12 +25,12 @@ public final class RemoteFeedLoader {
     guard
       let response,
       response.0.statusCode == 200,
-      let _ = try? JSONSerialization.jsonObject(with: response.1)
+      let root = try? JSONDecoder().decode(Root.self, from: response.1)
     else {
       throw Error.invalidData
     }
     
-    return .success([])
+    return .success(root.feedItems)
   }
 
   public enum Error: Swift.Error {
@@ -45,6 +45,9 @@ public final class RemoteFeedLoader {
 
   private struct Root: Decodable {
     let items: [Item]
+    var feedItems: [FeedItem] {
+      items.map { $0.feedItem }
+    }
   }
   private struct Item: Decodable {
     let id: UUID
@@ -52,7 +55,7 @@ public final class RemoteFeedLoader {
     let location: String?
     let image: URL
 
-    var item: FeedItem {
+    var feedItem: FeedItem {
       return FeedItem(id: id, description: description, location: location, imageURL: image)
     }
   }
