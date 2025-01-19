@@ -25,12 +25,12 @@ public final class RemoteFeedLoader {
     guard
       let response,
       response.0.statusCode == 200,
-      let feedItems = try? JSONDecoder().decode([FeedItem].self, from: response.1)
+      let _ = try? JSONSerialization.jsonObject(with: response.1)
     else {
       throw Error.invalidData
     }
     
-    return .success(feedItems)
+    return .success([])
   }
 
   public enum Error: Swift.Error {

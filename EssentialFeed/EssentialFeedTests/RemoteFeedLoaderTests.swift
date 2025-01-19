@@ -36,7 +36,7 @@ struct RemoteFeedLoaderTests {
 
   @Test(arguments: [199, 201, 300, 400, 500])
   func load_deliversErrorOnNon200HTTPResponse(code: Int) {
-    let (sut, client) = makeSUT(url: someURL)
+    let (sut, client) = makeSUT()
     client.stubResponse(
       makeResponse(from: someURL, and: code),
       someData
@@ -57,6 +57,19 @@ struct RemoteFeedLoaderTests {
     let capturedErrors = loadAndCaptureResult(for: sut)
 
     #expect(capturedErrors == [.failure(.invalidData)])
+  }
+
+  @Test func load_deliversNoItemsOn200HTTPResponseWithEmptyJSON() {
+    let (sut, client) = makeSUT()
+    let emptyJSON = "{\"items\": []}".data(using: .utf8)!
+    client.stubResponse(
+      makeResponse(from: someURL, and: 200),
+      emptyJSON
+    )
+
+    let capturedResult = loadAndCaptureResult(for: sut)
+
+    #expect(capturedResult == [.success([])])
   }
 
   // MARK: - Helpers
