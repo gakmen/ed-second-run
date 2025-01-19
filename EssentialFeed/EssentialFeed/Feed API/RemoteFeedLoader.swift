@@ -19,18 +19,11 @@ public final class RemoteFeedLoader {
     var response: HTTPClientResponse?
     do {
       response = try client.get(from: url)
-    } catch {
-      throw Error.connectivity
-    }
-    guard
-      let response,
-      response.0.statusCode == 200,
-      let root = try? JSONDecoder().decode(Root.self, from: response.1)
-    else {
-      throw Error.invalidData
-    }
-    
-    return .success(root.feedItems)
+    } catch { throw Error.connectivity }
+
+    guard let response else { throw Error.invalidData }
+
+    return .success(try FeedItemsMapper.map(response))
   }
 
   public enum Error: Swift.Error {
@@ -42,6 +35,17 @@ public final class RemoteFeedLoader {
     case success([FeedItem])
     case failure(Error)
   }
+}
+
+private enum FeedItemsMapper {
+  static func map(_ response: HTTPClientResponse) throws -> [FeedItem] {
+    guard
+      response.0.statusCode == 200,
+      let root = try? JSONDecoder().decode(Root.self, from: response.1)
+    else { throw RemoteFeedLoader.Error.invalidData }
+
+    return root.feedItems
+  }
 
   private struct Root: Decodable {
     let items: [Item]
@@ -49,6 +53,7 @@ public final class RemoteFeedLoader {
       items.map { $0.feedItem }
     }
   }
+
   private struct Item: Decodable {
     let id: UUID
     let description: String?
