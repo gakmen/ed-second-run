@@ -15,17 +15,31 @@ public final class RemoteFeedLoader {
     self.client = client
   }
 
-  public func load() throws {
+  public func load() throws -> Result {
+    var response: HTTPClientResponse?
     do {
-      _ = try client.get(from: url)
+      response = try client.get(from: url)
     } catch {
       throw Error.connectivity
     }
-    throw Error.invalidData
+    guard
+      let response,
+      response.0.statusCode == 200,
+      let feedItems = try? JSONDecoder().decode([FeedItem].self, from: response.1)
+    else {
+      throw Error.invalidData
+    }
+    
+    return .success(feedItems)
   }
 
   public enum Error: Swift.Error {
     case connectivity
     case invalidData
+  }
+
+  public enum Result: Equatable {
+    case success([FeedItem])
+    case failure(Error)
   }
 }

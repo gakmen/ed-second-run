@@ -12,7 +12,7 @@ struct RemoteFeedLoaderTests {
   @Test func load_requestsDataFromURL() {
     let (sut, client) = makeSUT(url: someURL)
 
-    try? sut.load()
+    _ = try? sut.load()
 
     #expect(client.requestedURLs == [someURL])
   }
@@ -20,8 +20,8 @@ struct RemoteFeedLoaderTests {
   @Test func loadTwice_requestsDataFromURLTwice() {
     let (sut, client) = makeSUT(url: someURL)
 
-    try? sut.load()
-    try? sut.load()
+    _ = try? sut.load()
+    _ = try? sut.load()
 
     #expect(client.requestedURLs == [someURL, someURL])
   }
@@ -31,7 +31,7 @@ struct RemoteFeedLoaderTests {
 
     let capturedErrors = loadAndCaptureResult(for: sut)
 
-    #expect(capturedErrors == [.connectivity])
+    #expect(capturedErrors == [.failure(.connectivity)])
   }
 
   @Test(arguments: [199, 201, 300, 400, 500])
@@ -44,7 +44,7 @@ struct RemoteFeedLoaderTests {
 
     let capturedErrors = loadAndCaptureResult(for: sut)
 
-    #expect(capturedErrors == [.invalidData])
+    #expect(capturedErrors == [.failure(.invalidData)])
   }
 
   @Test func load_deliversErrorOn200HTTPResponseWithInvalidData() {
@@ -56,7 +56,7 @@ struct RemoteFeedLoaderTests {
 
     let capturedErrors = loadAndCaptureResult(for: sut)
 
-    #expect(capturedErrors == [.invalidData])
+    #expect(capturedErrors == [.failure(.invalidData)])
   }
 
   // MARK: - Helpers
@@ -82,15 +82,15 @@ struct RemoteFeedLoaderTests {
     )!
   }
 
-  private func loadAndCaptureResult(for sut: RemoteFeedLoader) -> [RemoteFeedLoader.Error] {
-    var capturedErrors = [RemoteFeedLoader.Error]()
+  private func loadAndCaptureResult(for sut: RemoteFeedLoader) -> [RemoteFeedLoader.Result] {
+    var capturedResult = [RemoteFeedLoader.Result]()
     do {
-      try sut.load()
+      capturedResult.append(try sut.load())
     } catch let error as RemoteFeedLoader.Error {
-      capturedErrors.append(error)
+      capturedResult.append(.failure(error))
     } catch {}
 
-    return capturedErrors
+    return capturedResult
   }
 
   private class HTTPClientSpy: HTTPClient {
