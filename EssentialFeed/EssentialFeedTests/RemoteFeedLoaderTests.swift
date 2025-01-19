@@ -95,6 +95,31 @@ struct RemoteFeedLoaderTests {
     )!
   }
 
+  private func makeItem(
+    id: UUID,
+    description: String? = nil,
+    location: String? = nil,
+    imageURL: URL
+  ) -> (model: FeedItem, json: [String: Any]) {
+    let item = FeedItem(id: id, description: description, location: location, imageURL: imageURL)
+
+    let json = [
+      "id": id.uuidString,
+      "description": description,
+      "location": location,
+      "image": imageURL.absoluteString
+    ].reduce(into: [String: Any]()) { (acc, e) in
+      if let value = e.value { acc[e.key] = value }
+    }
+
+    return (item, json)
+  }
+
+    private func makeItemsJSON(_ items: [[String: Any]]) -> Data {
+      let json = ["items": items]
+      return try! JSONSerialization.data(withJSONObject: json)
+    }
+
   private func loadAndCaptureResult(for sut: RemoteFeedLoader) -> [RemoteFeedLoader.Result] {
     var capturedResult = [RemoteFeedLoader.Result]()
     do {
