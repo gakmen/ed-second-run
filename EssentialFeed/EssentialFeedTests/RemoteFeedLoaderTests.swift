@@ -61,7 +61,7 @@ struct RemoteFeedLoaderTests {
 
   @Test func load_deliversNoItemsOn200HTTPResponseWithEmptyJSON() {
     let (sut, client) = makeSUT()
-    let emptyJSON = "{\"items\": []}".data(using: .utf8)!
+    let emptyJSON = makeItemsJSON([])
     client.stubResponse(
       makeResponse(from: someURL, and: 200),
       emptyJSON
