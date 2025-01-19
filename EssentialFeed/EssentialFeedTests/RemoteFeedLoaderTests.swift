@@ -97,17 +97,18 @@ struct RemoteFeedLoaderTests {
     var requestedURLs = [URL]()
     private var receivedResponses = ([HTTPURLResponse](), [Data]())
 
-    func get(from url: URL) throws -> HTTPClientResponse {
-      requestedURLs.append(url)
-      guard let firstResponse = receivedResponses.0.first else {
-        throw NSError(domain: "HTTPClientSpy error", code: 0)
-      }
-      return (firstResponse, "Invalid JSON".data(using: .utf8)!)
-    }
-
     func stubResponse(_ response: HTTPURLResponse, _ data: Data) {
       receivedResponses.0.append(response)
       receivedResponses.1.append(data)
+    }
+
+    func get(from url: URL) throws -> HTTPClientResponse {
+      requestedURLs.append(url)
+      guard let firstResponse = receivedResponses.0.first, let firstData = receivedResponses.1.first
+      else {
+        throw NSError(domain: "HTTPClientSpy error", code: 0)
+      }
+      return (firstResponse, firstData)
     }
   }
 
