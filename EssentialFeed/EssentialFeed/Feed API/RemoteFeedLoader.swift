@@ -1,7 +1,9 @@
 import Foundation
 
+public typealias HTTPClientResponse = (HTTPURLResponse, Data)
+
 public protocol HTTPClient {
-  func get(from url: URL) throws -> HTTPURLResponse
+  func get(from url: URL) throws -> HTTPClientResponse
 }
 
 public final class RemoteFeedLoader {

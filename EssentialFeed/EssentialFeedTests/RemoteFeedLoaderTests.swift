@@ -10,63 +10,58 @@ struct RemoteFeedLoaderTests {
   }
 
   @Test func load_requestsDataFromURL() {
-    let url = URL(string: "https://a-given-url.ru")!
-    let (sut, client) = makeSUT(url: url)
+    let (sut, client) = makeSUT(url: someURL)
 
     try? sut.load()
 
-    #expect(client.requestedURLs == [url])
+    #expect(client.requestedURLs == [someURL])
   }
 
   @Test func loadTwice_requestsDataFromURLTwice() {
-    let url = URL(string: "https://a-given-url.ru")!
-    let (sut, client) = makeSUT(url: url)
+    let (sut, client) = makeSUT(url: someURL)
 
     try? sut.load()
     try? sut.load()
 
-    #expect(client.requestedURLs == [url, url])
+    #expect(client.requestedURLs == [someURL, someURL])
   }
 
   @Test func load_deliversErrorOnClientError() {
     let (sut, _) = makeSUT()
 
-    var capturedErrors = [RemoteFeedLoader.Error]()
-    do {
-      try sut.load()
-    } catch let error as RemoteFeedLoader.Error {
-      capturedErrors.append(error)
-    } catch {}
+    let capturedErrors = loadAndCaptureResult(for: sut)
 
     #expect(capturedErrors == [.connectivity])
   }
 
   @Test(arguments: [199, 201, 300, 400, 500])
   func load_deliversErrorOnNon200HTTPResponse(code: Int) {
-    let url = URL(string: "https://a-given-url.ru")!
-    let (sut, client) = makeSUT(url: url)
-    client.responses.append(
-      HTTPURLResponse(
-        url: url,
-        statusCode: code,
-        httpVersion: nil,
-        headerFields: nil
-      )!
+    let (sut, client) = makeSUT(url: someURL)
+    client.stubResponse(
+      makeResponse(from: someURL, and: code),
+      someData
     )
 
-    var capturedErrors = [RemoteFeedLoader.Error]()
-    do {
-      try sut.load()
-    } catch let error as RemoteFeedLoader.Error {
-      capturedErrors.append(error)
-    } catch {}
+    let capturedErrors = loadAndCaptureResult(for: sut)
+
+    #expect(capturedErrors == [.invalidData])
+  }
+
+  @Test func load_deliversErrorOn200HTTPResponseWithInvalidData() {
+    let (sut, client) = makeSUT()
+    client.stubResponse(
+      makeResponse(from: someURL, and: 200),
+      invalidJSONData
+    )
+
+    let capturedErrors = loadAndCaptureResult(for: sut)
 
     #expect(capturedErrors == [.invalidData])
   }
 
   // MARK: - Helpers
 
-  func makeSUT(
+  private func makeSUT(
     url: URL = URL(string: "https://a-url.ru")!
   ) -> (sut: RemoteFeedLoader, client: HTTPClientSpy) {
     let client = HTTPClientSpy()
@@ -74,16 +69,45 @@ struct RemoteFeedLoaderTests {
     return (sut, client)
   }
 
-  class HTTPClientSpy: HTTPClient {
-    var requestedURLs = [URL]()
-    var responses = [HTTPURLResponse]()
+  private let someURL = URL(string: "https://some-url.ru")!
+  private let someData = "Some data".data(using: .utf8)!
+  private let invalidJSONData = "Invalid JSON".data(using: .utf8)!
 
-    func get(from url: URL) throws -> HTTPURLResponse {
+  private func makeResponse(from url: URL, and code: Int) -> HTTPURLResponse {
+    HTTPURLResponse(
+      url: url,
+      statusCode: code,
+      httpVersion: nil,
+      headerFields: nil
+    )!
+  }
+
+  private func loadAndCaptureResult(for sut: RemoteFeedLoader) -> [RemoteFeedLoader.Error] {
+    var capturedErrors = [RemoteFeedLoader.Error]()
+    do {
+      try sut.load()
+    } catch let error as RemoteFeedLoader.Error {
+      capturedErrors.append(error)
+    } catch {}
+
+    return capturedErrors
+  }
+
+  private class HTTPClientSpy: HTTPClient {
+    var requestedURLs = [URL]()
+    private var receivedResponses = ([HTTPURLResponse](), [Data]())
+
+    func get(from url: URL) throws -> HTTPClientResponse {
       requestedURLs.append(url)
-      guard let firstResponse = responses.first else {
+      guard let firstResponse = receivedResponses.0.first else {
         throw NSError(domain: "HTTPClientSpy error", code: 0)
       }
-      return firstResponse
+      return (firstResponse, "Invalid JSON".data(using: .utf8)!)
+    }
+
+    func stubResponse(_ response: HTTPURLResponse, _ data: Data) {
+      receivedResponses.0.append(response)
+      receivedResponses.1.append(data)
     }
   }
 
