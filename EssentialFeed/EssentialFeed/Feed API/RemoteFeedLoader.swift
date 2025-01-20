@@ -1,11 +1,5 @@
 import Foundation
 
-public typealias HTTPClientResponse = (HTTPURLResponse, Data)
-
-public protocol HTTPClient {
-  func get(from url: URL) throws -> HTTPClientResponse
-}
-
 public final class RemoteFeedLoader {
   private let url: URL
   private let client: HTTPClient
