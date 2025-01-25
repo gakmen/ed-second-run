@@ -35,9 +35,7 @@ final class RemoteFeedLoaderTests {
   @Test func load_deliversErrorOnClientError() {
     let (sut, _) = makeSUT()
 
-    let capturedErrors = loadAndCaptureResult(for: sut)
-
-    #expect(capturedErrors == [.failure(.connectivity)])
+    expect(sut, toFailWithError: .connectivity)
   }
 
   @Test(arguments: [199, 201, 300, 400, 500])
@@ -48,9 +46,7 @@ final class RemoteFeedLoaderTests {
       someData
     )
 
-    let capturedErrors = loadAndCaptureResult(for: sut)
-
-    #expect(capturedErrors == [.failure(.invalidData)])
+    expect(sut, toFailWithError: .invalidData)
   }
 
   @Test func load_deliversErrorOn200HTTPResponseWithInvalidData() {
@@ -60,12 +56,10 @@ final class RemoteFeedLoaderTests {
       invalidJSONData
     )
 
-    let capturedErrors = loadAndCaptureResult(for: sut)
-
-    #expect(capturedErrors == [.failure(.invalidData)])
+    expect(sut, toFailWithError: .invalidData)
   }
 
-  @Test func load_deliversNoItemsOn200HTTPResponseWithEmptyJSON() {
+  @Test func load_deliversNoItemsOn200HTTPResponseWithEmptyJSON() throws {
     let (sut, client) = makeSUT()
     let emptyJSON = makeItemsJSON([])
     client.stubResponse(
@@ -73,12 +67,12 @@ final class RemoteFeedLoaderTests {
       emptyJSON
     )
 
-    let capturedResult = loadAndCaptureResult(for: sut)
-
-    #expect(capturedResult == [.success([])])
+    let expectedResult = [FeedItem]()
+    let receivedResult = try sut.load()
+    #expect(receivedResult == expectedResult)
   }
 
-  @Test func load_deliversFeedItemsOn200HTTPResponseWithValidJSON() {
+  @Test func load_deliversFeedItemsOn200HTTPResponseWithValidJSON() throws {
     let (sut, client) = makeSUT()
     let item1 = makeItem(id: UUID(), imageURL: URL(string: "https://image1.ru")!)
     let item2 = makeItem(
@@ -93,10 +87,9 @@ final class RemoteFeedLoaderTests {
       itemsJSON
     )
 
-    let capturedResult = loadAndCaptureResult(for: sut)
-    let items = [item1.model, item2.model]
-
-    #expect(capturedResult == [.success(items)])
+    let expectedResult = [item1.model, item2.model]
+    let receivedResult = try sut.load()
+    #expect(receivedResult == expectedResult)
   }
 
   // MARK: - Helpers
@@ -153,15 +146,17 @@ final class RemoteFeedLoaderTests {
       return try! JSONSerialization.data(withJSONObject: json)
     }
 
-  private func loadAndCaptureResult(for sut: RemoteFeedLoader) -> [RemoteFeedLoader.Result] {
-    var capturedResult = [RemoteFeedLoader.Result]()
+  private func expect(
+    _ sut: RemoteFeedLoader,
+    toFailWithError expectedError: RemoteFeedLoader.Error
+  ) {
     do {
-      capturedResult.append(try sut.load())
+      _ = try sut.load()
     } catch let error as RemoteFeedLoader.Error {
-      capturedResult.append(.failure(error))
-    } catch {}
-
-    return capturedResult
+      #expect(error == expectedError)
+    } catch {
+      Issue.record("Couldn't cast error to RemoteFeedLoader.Error: \(error)")
+    }
   }
 
   private class HTTPClientSpy: HTTPClient {
