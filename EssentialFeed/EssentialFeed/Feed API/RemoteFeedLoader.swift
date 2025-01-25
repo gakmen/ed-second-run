@@ -10,12 +10,10 @@ public final class RemoteFeedLoader {
   }
 
   public func load() throws -> Result {
-    var response: HTTPClientResponse?
+    let response: HTTPClientResponse
     do {
       response = try client.get(from: url)
     } catch { throw Error.connectivity }
-
-    guard let response else { throw Error.invalidData }
 
     return .success(try FeedItemsMapper.map(response))
   }
