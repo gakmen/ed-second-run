@@ -59,7 +59,7 @@ final class URLSessionHTTPClientTests {
       expectedContentLength: 0,
       textEncodingName: nil
     )
-    URLProtocolStub.stub(with: .success(("some data".data(using: .utf8)!, nonHTTPResponse)))
+    URLProtocolStub.stub(with: .success((someData, nonHTTPResponse)))
 
     do {
       _ = try await makeSUT().get(from: someURL)
@@ -68,14 +68,34 @@ final class URLSessionHTTPClientTests {
     }
   }
 
+  @Test func getFromURL_succeedsOnHTTPResponseWithData() async {
+    let expectedResponse = HTTPURLResponse(
+      url: someURL,
+      statusCode: 200,
+      httpVersion: nil,
+      headerFields: nil
+    )!
+    URLProtocolStub.stub(with: .success((someData, expectedResponse)))
+
+    do {
+      let (response, data) = try await makeSUT().get(from: someURL)
+      #expect(data == someData)
+      #expect(response.url == expectedResponse.url)
+      #expect(response.statusCode == expectedResponse.statusCode)
+    } catch {
+      Issue.record("Expected successful execution, got error instead: \(error)")
+    }
+  }
+
   // MARK: - Helpers
 
-  private func makeSUT() -> URLSessionHTTPClient {
+  private func makeSUT() -> HTTPClient {
     URLSessionHTTPClient()
   }
 
   private let someURL: URL = URL(string: "https://some-url.ru")!
   private let someError: Error = NSError(domain: "some error", code: 0)
+  private let someData: Data = "some data".data(using: .utf8)!
 
   typealias StubbedResult = Result<(Data, URLResponse), Error>
 
