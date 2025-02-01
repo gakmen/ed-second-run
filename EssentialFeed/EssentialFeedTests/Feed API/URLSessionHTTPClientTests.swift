@@ -15,9 +15,9 @@ struct URLSessionHTTPClient: HTTPClient {
     var resultError: Error?
 
     do {
-      let result = try await session.data(from: url)
-      resultResponse = result.1 as? HTTPURLResponse
-      resultData = result.0
+      let (data, response) = try await session.data(from: url)
+      resultData = data
+      resultResponse = response as? HTTPURLResponse
     } catch { resultError = error }
 
     guard resultError == nil, let resultResponse, let resultData else {
@@ -52,6 +52,16 @@ final class URLSessionHTTPClientTests {
       _ = try await makeSUT().get(from: someURL)
     } catch let receivedError as NSError {
       #expect(receivedError.domain == expectedError.domain)
+    } catch { Issue.record("Could not cast error to NSError: \(error)") }
+  }
+
+  @Test func getFromURL_failsOnAllNilValues() async {
+    URLProtocolStub.stub(data: nil, response: nil, error: nil)
+
+    do {
+      _ = try await makeSUT().get(from: someURL)
+    } catch let receivedError as NSError {
+      #expect(receivedError.domain == "Network request failed without an error")
     } catch { Issue.record("Could not cast error to NSError: \(error)") }
   }
 
