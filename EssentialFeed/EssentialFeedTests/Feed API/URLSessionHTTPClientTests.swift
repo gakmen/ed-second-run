@@ -34,24 +34,22 @@ final class URLSessionHTTPClientTests {
   deinit { URLProtocolStub.stopInterceptingRequests() }
 
   @Test func getFromURL_performsGETRequestWithAGivenURL() async throws {
-    let url = URL(string: "https://some-url.ru")!
-    URLProtocolStub.stub(data: nil, response: nil, error: NSError(domain: "test", code: 0))
+    URLProtocolStub.stub(data: nil, response: nil, error: someError)
 
-    _ = try? await makeSUT().get(from: url)
+    _ = try? await makeSUT().get(from: someURL)
 
     let (observedURL, observedMethod) = try await URLProtocolStub.observeRequest()
 
-    #expect(observedURL == url)
+    #expect(observedURL == someURL)
     #expect(observedMethod == "GET")
   }
 
   @Test func getFromURL_failsOnRequestError() async {
-    let url = URL(string: "https://some-url.ru")!
     let expectedError = NSError(domain: "test error", code: 0)
     URLProtocolStub.stub(data: nil, response: nil, error: expectedError)
 
     do {
-      _ = try await makeSUT().get(from: url)
+      _ = try await makeSUT().get(from: someURL)
     } catch let receivedError as NSError {
       #expect(receivedError.domain == expectedError.domain)
     } catch { Issue.record("Could not cast error to NSError: \(error)") }
@@ -62,6 +60,9 @@ final class URLSessionHTTPClientTests {
   private func makeSUT() -> URLSessionHTTPClient {
     URLSessionHTTPClient()
   }
+
+  private let someURL: URL = URL(string: "https://some-url.ru")!
+  private let someError: Error = NSError(domain: "some error", code: 0)
 
   private class URLProtocolStub: URLProtocol {
     private static var request: URLRequest?
