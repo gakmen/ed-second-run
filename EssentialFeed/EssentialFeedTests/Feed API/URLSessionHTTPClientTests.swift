@@ -34,11 +34,10 @@ final class URLSessionHTTPClientTests {
   deinit { URLProtocolStub.stopInterceptingRequests() }
 
   @Test func getFromURL_performsGETRequestWithAGivenURL() async throws {
-    let sut = URLSessionHTTPClient()
     let url = URL(string: "https://some-url.ru")!
     URLProtocolStub.stub(data: nil, response: nil, error: NSError(domain: "test", code: 0))
 
-    _ = try? await sut.get(from: url)
+    _ = try? await makeSUT().get(from: url)
 
     let (observedURL, observedMethod) = try await URLProtocolStub.observeRequest()
 
@@ -47,13 +46,12 @@ final class URLSessionHTTPClientTests {
   }
 
   @Test func getFromURL_failsOnRequestError() async {
-    let sut = URLSessionHTTPClient()
     let url = URL(string: "https://some-url.ru")!
     let expectedError = NSError(domain: "test error", code: 0)
     URLProtocolStub.stub(data: nil, response: nil, error: expectedError)
 
     do {
-      _ = try await sut.get(from: url)
+      _ = try await makeSUT().get(from: url)
     } catch let receivedError as NSError {
       #expect(receivedError.domain == expectedError.domain)
     } catch { Issue.record("Could not cast error to NSError: \(error)") }
@@ -61,10 +59,8 @@ final class URLSessionHTTPClientTests {
 
   // MARK: - Helpers
 
-  func makeTestSession() -> URLSession {
-    let configuration = URLSessionConfiguration.ephemeral
-    configuration.protocolClasses = [URLProtocolStub.self]
-    return URLSession(configuration: configuration)
+  private func makeSUT() -> URLSessionHTTPClient {
+    URLSessionHTTPClient()
   }
 
   private class URLProtocolStub: URLProtocol {
