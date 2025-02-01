@@ -31,7 +31,7 @@ final class URLSessionHTTPClientTests {
   deinit { URLProtocolStub.stopInterceptingRequests() }
 
   @Test func getFromURL_performsGETRequestWithAGivenURL() async throws {
-    URLProtocolStub.stub(data: nil, response: nil, error: someError)
+    URLProtocolStub.stub(with: .failure(someError))
 
     _ = try? await makeSUT().get(from: someURL)
 
@@ -43,7 +43,7 @@ final class URLSessionHTTPClientTests {
 
   @Test func getFromURL_failsOnRequestError() async {
     let expectedError = NSError(domain: "test error", code: 0)
-    URLProtocolStub.stub(data: nil, response: nil, error: expectedError)
+    URLProtocolStub.stub(with: .failure(expectedError))
 
     do {
       _ = try await makeSUT().get(from: someURL)
@@ -59,11 +59,7 @@ final class URLSessionHTTPClientTests {
       expectedContentLength: 0,
       textEncodingName: nil
     )
-    URLProtocolStub.stub(
-      data: "some data".data(using: .utf8),
-      response: nonHTTPResponse,
-      error: nil
-    )
+    URLProtocolStub.stub(with: .success(("some data".data(using: .utf8)!, nonHTTPResponse)))
 
     do {
       _ = try await makeSUT().get(from: someURL)
@@ -81,15 +77,11 @@ final class URLSessionHTTPClientTests {
   private let someURL: URL = URL(string: "https://some-url.ru")!
   private let someError: Error = NSError(domain: "some error", code: 0)
 
+  typealias StubbedResult = Result<(Data, URLResponse), Error>
+
   private class URLProtocolStub: URLProtocol {
     private static var request: URLRequest?
-    private static var stubs = [Stub]()
-
-    private struct Stub {
-      let data: Data?
-      let response: URLResponse?
-      let error: Error?
-    }
+    private static var stubs = [StubbedResult]()
 
     static func observeRequest() async throws -> (URL, String) {
       if let url = Self.request?.url, let method = Self.request?.httpMethod {
@@ -99,8 +91,8 @@ final class URLSessionHTTPClientTests {
       }
     }
 
-    static func stub(data: Data?, response: URLResponse?, error: Error?) {
-      stubs.append(Stub(data: data, response: response, error: error))
+    static func stub(with result: StubbedResult) {
+      stubs.append(result)
     }
 
     static func startInterceptingRequests() {
@@ -124,13 +116,11 @@ final class URLSessionHTTPClientTests {
     override func startLoading() {
       guard let stub = Self.stubs.first else { return }
 
-      if let data = stub.data {
+      switch stub {
+      case let .success ((data, response)):
         client?.urlProtocol(self, didLoad: data)
-      }
-      if let response = stub.response {
         client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-      }
-      if let error = stub.error {
+      case let .failure(error):
         client?.urlProtocol(self, didFailWithError: error)
       }
 
