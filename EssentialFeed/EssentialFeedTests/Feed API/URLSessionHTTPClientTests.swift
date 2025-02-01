@@ -52,6 +52,26 @@ final class URLSessionHTTPClientTests {
     } catch { Issue.record("Could not cast error to NSError: \(error)") }
   }
 
+  @Test func getFromURL_failsOnUnexpectedNonHTTPResponse() async {
+    let nonHTTPResponse = URLResponse(
+      url: someURL,
+      mimeType: nil,
+      expectedContentLength: 0,
+      textEncodingName: nil
+    )
+    URLProtocolStub.stub(
+      data: "some data".data(using: .utf8),
+      response: nonHTTPResponse,
+      error: nil
+    )
+
+    do {
+      _ = try await makeSUT().get(from: someURL)
+    } catch {
+      #expect(error is URLSessionHTTPClient.UnexpectedResponse)
+    }
+  }
+
   // MARK: - Helpers
 
   private func makeSUT() -> URLSessionHTTPClient {
