@@ -2,7 +2,7 @@ import Testing
 import Foundation
 import EssentialFeed
 
-final class URLSessionHTTPClient: HTTPClient {
+struct URLSessionHTTPClient: HTTPClient {
   let session: URLSession
 
   init(session: URLSession = URLSession.shared) {
@@ -30,13 +30,8 @@ final class URLSessionHTTPClient: HTTPClient {
 
 @Suite(.serialized)
 final class URLSessionHTTPClientTests {
-  var memoryLeaksTracker: () -> Void = {}
-
   init() { URLProtocolStub.startInterceptingRequests() }
-  deinit {
-    URLProtocolStub.stopInterceptingRequests()
-    memoryLeaksTracker()
-  }
+  deinit { URLProtocolStub.stopInterceptingRequests() }
 
   @Test func getFromURL_performsGETRequestWithAGivenURL() async throws {
     let url = URL(string: "https://some-url.ru")!
@@ -65,9 +60,7 @@ final class URLSessionHTTPClientTests {
   // MARK: - Helpers
 
   private func makeSUT() -> URLSessionHTTPClient {
-    let sut = URLSessionHTTPClient()
-    memoryLeaksTracker = { [weak sut] in #expect(sut == nil) }
-    return sut
+    URLSessionHTTPClient()
   }
 
   private class URLProtocolStub: URLProtocol {
