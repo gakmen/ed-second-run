@@ -2,29 +2,6 @@ import Testing
 import Foundation
 import EssentialFeed
 
-struct URLSessionHTTPClient: HTTPClient {
-  let session: URLSession
-
-  init(session: URLSession = URLSession.shared) {
-    self.session = session
-  }
-
-  func get(from url: URL) async throws -> HTTPClientResponse {
-    do {
-      let (data, response) = try await session.data(from: url)
-      if let httpResponse = response as? HTTPURLResponse {
-        return (httpResponse, data)
-      } else {
-        throw UnexpectedResponse()
-      }
-    } catch {
-      throw error
-    }
-  }
-
-  struct UnexpectedResponse: Error {}
-}
-
 @Suite(.serialized)
 final class URLSessionHTTPClientTests {
   init() { URLProtocolStub.startInterceptingRequests() }
