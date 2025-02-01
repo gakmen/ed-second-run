@@ -9,10 +9,10 @@ public final class RemoteFeedLoader: FeedLoader {
     self.client = client
   }
 
-  public func load() throws -> [FeedItem] {
+  public func load() async throws -> [FeedItem] {
     let response: HTTPClientResponse
     do {
-      response = try client.get(from: url)
+      response = try await client.get(from: url)
     } catch { throw Error.connectivity }
 
     return try FeedItemsMapper.map(response)

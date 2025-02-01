@@ -3,21 +3,22 @@ import Foundation
 import EssentialFeed
 
 struct URLSessionHTTPClient: HTTPClient {
-  func get(from url: URL) throws -> HTTPClientResponse {
+  let session: URLSession
+
+  init(session: URLSession = URLSession.shared) {
+    self.session = session
+  }
+
+  func get(from url: URL) async throws -> HTTPClientResponse {
     var resultResponse: HTTPURLResponse?
     var resultData: Data?
     var resultError: Error?
 
-    let semaphore = DispatchSemaphore(value: 0)
-    Task {
-      defer { semaphore.signal() }
-      do {
-        let result = try await URLSession.shared.data(from: url)
-        resultResponse = result.1 as? HTTPURLResponse
-        resultData = result.0
-      } catch { resultError = error }
-    }
-    semaphore.wait()
+    do {
+      let result = try await session.data(from: url)
+      resultResponse = result.1 as? HTTPURLResponse
+      resultData = result.0
+    } catch { resultError = error }
 
     guard resultError == nil, let resultResponse, let resultData else {
       throw resultError ?? NSError(domain: "Network request failed without an error", code: 0)
@@ -27,18 +28,32 @@ struct URLSessionHTTPClient: HTTPClient {
   }
 }
 
+@Suite(.serialized)
 final class URLSessionHTTPClientTests {
   init() { URLProtocolStub.startInterceptingRequests() }
   deinit { URLProtocolStub.stopInterceptingRequests() }
 
-  @Test func getFromURL_failsOnRequestError() {
+  @Test func getFromURL_performsGETRequestWithAGivenURL() async throws {
+    let sut = URLSessionHTTPClient()
+    let url = URL(string: "https://some-url.ru")!
+    URLProtocolStub.stub(data: nil, response: nil, error: NSError(domain: "test", code: 0))
+
+    _ = try? await sut.get(from: url)
+
+    let (observedURL, observedMethod) = try await URLProtocolStub.observeRequest()
+
+    #expect(observedURL == url)
+    #expect(observedMethod == "GET")
+  }
+
+  @Test func getFromURL_failsOnRequestError() async {
     let sut = URLSessionHTTPClient()
     let url = URL(string: "https://some-url.ru")!
     let expectedError = NSError(domain: "test error", code: 0)
     URLProtocolStub.stub(data: nil, response: nil, error: expectedError)
 
     do {
-      _ = try sut.get(from: url)
+      _ = try await sut.get(from: url)
     } catch let receivedError as NSError {
       #expect(receivedError.domain == expectedError.domain)
     } catch { Issue.record("Could not cast error to NSError: \(error)") }
@@ -46,7 +61,14 @@ final class URLSessionHTTPClientTests {
 
   // MARK: - Helpers
 
+  func makeTestSession() -> URLSession {
+    let configuration = URLSessionConfiguration.ephemeral
+    configuration.protocolClasses = [URLProtocolStub.self]
+    return URLSession(configuration: configuration)
+  }
+
   private class URLProtocolStub: URLProtocol {
+    private static var request: URLRequest?
     private static var stubs = [Stub]()
 
     private struct Stub {
@@ -55,27 +77,38 @@ final class URLSessionHTTPClientTests {
       let error: Error?
     }
 
+    static func observeRequest() async throws -> (URL, String) {
+      if let url = Self.request?.url, let method = Self.request?.httpMethod {
+        return (url, method)
+      } else {
+        throw NSError(domain: "No request", code: 0)
+      }
+    }
+
     static func stub(data: Data?, response: URLResponse?, error: Error?) {
       stubs.append(Stub(data: data, response: response, error: error))
     }
 
     static func startInterceptingRequests() {
-      URLProtocol.registerClass(URLProtocolStub.self)
+      URLProtocol.registerClass(Self.self)
     }
 
     static func stopInterceptingRequests() {
-      URLProtocol.unregisterClass(URLProtocolStub.self)
+      URLProtocol.unregisterClass(Self.self)
       stubs = []
     }
 
-    override class func canInit(with request: URLRequest) -> Bool { true }
+    override class func canInit(with request: URLRequest) -> Bool {
+      Self.request = request
+      return true
+    }
 
     override class func canonicalRequest(for request: URLRequest) -> URLRequest {
       return request
     }
 
     override func startLoading() {
-      guard let stub = URLProtocolStub.stubs.first else { return }
+      guard let stub = Self.stubs.first else { return }
 
       if let data = stub.data {
         client?.urlProtocol(self, didLoad: data)

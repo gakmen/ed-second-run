@@ -15,51 +15,51 @@ final class RemoteFeedLoaderTests {
     #expect(client.requestedURLs.isEmpty)
   }
 
-  @Test func load_requestsDataFromURL() {
+  @Test func load_requestsDataFromURL() async {
     let (sut, client) = makeSUT(url: someURL)
 
-    _ = try? sut.load()
+    _ = try? await sut.load()
 
     #expect(client.requestedURLs == [someURL])
   }
 
-  @Test func loadTwice_requestsDataFromURLTwice() {
+  @Test func loadTwice_requestsDataFromURLTwice() async {
     let (sut, client) = makeSUT(url: someURL)
 
-    _ = try? sut.load()
-    _ = try? sut.load()
+    _ = try? await sut.load()
+    _ = try? await sut.load()
 
     #expect(client.requestedURLs == [someURL, someURL])
   }
 
-  @Test func load_deliversErrorOnClientError() {
+  @Test func load_deliversErrorOnClientError() async {
     let (sut, _) = makeSUT()
 
-    expect(sut, toFailWithError: .connectivity)
+    await expect(sut, toFailWithError: .connectivity)
   }
 
   @Test(arguments: [199, 201, 300, 400, 500])
-  func load_deliversErrorOnNon200HTTPResponse(code: Int) {
+  func load_deliversErrorOnNon200HTTPResponse(code: Int) async {
     let (sut, client) = makeSUT()
     client.stubResponse(
       makeResponse(from: someURL, and: code),
       someData
     )
 
-    expect(sut, toFailWithError: .invalidData)
+    await expect(sut, toFailWithError: .invalidData)
   }
 
-  @Test func load_deliversErrorOn200HTTPResponseWithInvalidData() {
+  @Test func load_deliversErrorOn200HTTPResponseWithInvalidData() async {
     let (sut, client) = makeSUT()
     client.stubResponse(
       makeResponse(from: someURL, and: 200),
       invalidJSONData
     )
 
-    expect(sut, toFailWithError: .invalidData)
+    await expect(sut, toFailWithError: .invalidData)
   }
 
-  @Test func load_deliversNoItemsOn200HTTPResponseWithEmptyJSON() throws {
+  @Test func load_deliversNoItemsOn200HTTPResponseWithEmptyJSON() async throws {
     let (sut, client) = makeSUT()
     let emptyJSON = makeItemsJSON([])
     client.stubResponse(
@@ -68,11 +68,11 @@ final class RemoteFeedLoaderTests {
     )
 
     let expectedResult = [FeedItem]()
-    let receivedResult = try sut.load()
+    let receivedResult = try await sut.load()
     #expect(receivedResult == expectedResult)
   }
 
-  @Test func load_deliversFeedItemsOn200HTTPResponseWithValidJSON() throws {
+  @Test func load_deliversFeedItemsOn200HTTPResponseWithValidJSON() async throws {
     let (sut, client) = makeSUT()
     let item1 = makeItem(id: UUID(), imageURL: URL(string: "https://image1.ru")!)
     let item2 = makeItem(
@@ -88,7 +88,7 @@ final class RemoteFeedLoaderTests {
     )
 
     let expectedResult = [item1.model, item2.model]
-    let receivedResult = try sut.load()
+    let receivedResult = try await sut.load()
     #expect(receivedResult == expectedResult)
   }
 
@@ -149,9 +149,9 @@ final class RemoteFeedLoaderTests {
   private func expect(
     _ sut: RemoteFeedLoader,
     toFailWithError expectedError: RemoteFeedLoader.Error
-  ) {
+  ) async {
     do {
-      _ = try sut.load()
+      _ = try await sut.load()
     } catch let error as RemoteFeedLoader.Error {
       #expect(error == expectedError)
     } catch {

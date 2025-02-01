@@ -1,3 +1,3 @@
 public protocol FeedLoader {
-  func load() throws -> [FeedItem]
+  func load() async throws -> [FeedItem]
 }
