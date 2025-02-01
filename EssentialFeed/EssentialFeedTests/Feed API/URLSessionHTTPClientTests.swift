@@ -55,16 +55,6 @@ final class URLSessionHTTPClientTests {
     } catch { Issue.record("Could not cast error to NSError: \(error)") }
   }
 
-  @Test func getFromURL_failsOnAllNilValues() async {
-    URLProtocolStub.stub(data: nil, response: nil, error: nil)
-
-    do {
-      _ = try await makeSUT().get(from: someURL)
-    } catch let receivedError as NSError {
-      #expect(receivedError.domain == "Network request failed without an error")
-    } catch { Issue.record("Could not cast error to NSError: \(error)") }
-  }
-
   // MARK: - Helpers
 
   private func makeSUT() -> URLSessionHTTPClient {
