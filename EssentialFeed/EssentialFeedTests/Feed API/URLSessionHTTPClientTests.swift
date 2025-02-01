@@ -10,22 +10,19 @@ struct URLSessionHTTPClient: HTTPClient {
   }
 
   func get(from url: URL) async throws -> HTTPClientResponse {
-    var resultResponse: HTTPURLResponse?
-    var resultData: Data?
-    var resultError: Error?
-
     do {
       let (data, response) = try await session.data(from: url)
-      resultData = data
-      resultResponse = response as? HTTPURLResponse
-    } catch { resultError = error }
-
-    guard resultError == nil, let resultResponse, let resultData else {
-      throw resultError ?? NSError(domain: "Network request failed without an error", code: 0)
+      if let httpResponse = response as? HTTPURLResponse {
+        return (httpResponse, data)
+      } else {
+        throw UnexpectedResponse()
+      }
+    } catch {
+      throw error
     }
-
-    return (resultResponse, resultData)
   }
+
+  struct UnexpectedResponse: Error {}
 }
 
 @Suite(.serialized)
