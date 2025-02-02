@@ -2,13 +2,7 @@ import EssentialFeed
 import Foundation
 import Testing
 
-final class RemoteFeedLoaderTests {
-  var memoryLeaksTracker: () -> Void = {}
-
-  deinit {
-    memoryLeaksTracker()
-  }
-
+struct RemoteFeedLoaderTests {
   @Test func init_doesNotRequestDataFromURL() {
     let (_, client) = makeSUT()
 
@@ -99,11 +93,6 @@ final class RemoteFeedLoaderTests {
   ) -> (sut: RemoteFeedLoader, client: HTTPClientSpy) {
     let client = HTTPClientSpy()
     let sut = RemoteFeedLoader(url: url, client: client)
-
-    memoryLeaksTracker = { [weak client, weak sut] in
-      #expect(client == nil)
-      #expect(sut == nil)
-    }
 
     return (sut, client)
   }
