@@ -1,5 +1,11 @@
 import SwiftUI
 
+struct FeedImageViewModel {
+  let description: String?
+  let location: String?
+  let imageName: String
+}
+
 struct FeedView: View {
   init() {
     let appearance = {
