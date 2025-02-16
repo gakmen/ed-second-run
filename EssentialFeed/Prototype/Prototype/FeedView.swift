@@ -23,17 +23,12 @@ struct FeedView: View {
     NavigationView {
       List {
         Spacer()
+          .frame(height: 10)
           .listRowSeparator(.hidden)
-        FeedImageCell()
-          .listRowSeparator(.hidden)
-        FeedImageCell()
-          .listRowSeparator(.hidden)
-        FeedImageCell()
-          .listRowSeparator(.hidden)
-        FeedImageCell()
-          .listRowSeparator(.hidden)
-        FeedImageCell()
-          .listRowSeparator(.hidden)
+        ForEach(FeedImageViewModel.prototypeFeed, id: \.self) {
+          FeedImageCell(image: $0.imageName, location: $0.location, description: $0.description)
+            .listRowSeparator(.hidden)
+        }
         Spacer()
           .listRowSeparator(.hidden)
       }
@@ -51,35 +46,46 @@ struct FeedView: View {
 }
 
 struct FeedImageCell: View {
+  let image: String
+  let location: String?
+  let description: String?
+
+  init(image: String, location: String?, description: String?) {
+    self.image = image
+    self.location = location
+    self.description = description
+  }
+
   var body: some View {
     VStack(alignment: .leading, spacing: 10) {
-      HStack(alignment: .firstTextBaseline, spacing: 6) {
-        Image(.pin)
-          .offset(y: 3)
-        Text(
-          """
-          Location,
-          Location
-          """
-        )
-        .font(.system(size: 15))
-        .foregroundStyle(.tertiary)
-        .lineLimit(2)
-        Spacer()
+      if let location {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+          Image(.pin)
+            .offset(y: 3)
+          Text(location)
+          .font(.system(size: 15))
+          .foregroundStyle(.tertiary)
+          .lineLimit(2)
+          Spacer()
+        }
       }
 
-      GeometryReader {
-        let squareSize = $0.size.width
-        RoundedRectangle(cornerRadius: 22)
-          .foregroundStyle(.quaternary)
-          .frame(width: squareSize, height: squareSize)
+      GeometryReader { geometry in
+        let squareSide = geometry.size.width
+        Image(.init(stringLiteral: image))
+          .resizable()
+          .scaledToFill()
+          .frame(width: squareSide, height: squareSide)
+          .clipShape(RoundedRectangle(cornerRadius: 22))
       }
       .aspectRatio(1, contentMode: .fit)
 
-      Text("Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description ")
-        .lineLimit(6)
-        .font(.system(size: 16))
-        .foregroundStyle(.secondary)
+      if let description {
+        Text(description)
+          .lineLimit(6)
+          .font(.system(size: 16))
+          .foregroundStyle(.secondary)
+      }
     }
   }
 }

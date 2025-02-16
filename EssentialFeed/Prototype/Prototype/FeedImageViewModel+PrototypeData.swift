@@ -1,4 +1,15 @@
-extension FeedImageViewModel {
+extension FeedImageViewModel: Hashable {
+  static func == (lhs: FeedImageViewModel, rhs: FeedImageViewModel) -> Bool {
+    lhs.imageName == rhs.imageName && lhs.description == rhs.description && lhs.location == rhs.location
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(description)
+    hasher.combine(location)
+    hasher.combine(imageName)
+
+  }
+
   static var prototypeFeed: [FeedImageViewModel] {
     return [
       FeedImageViewModel(
