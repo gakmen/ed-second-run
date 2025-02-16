@@ -15,19 +15,23 @@ struct FeedView: View {
 
   var body: some View {
     NavigationView {
-      List {
-        FeedImageCell()
-          .listRowSeparator(.hidden)
-        FeedImageCell()
-          .listRowSeparator(.hidden)
-        FeedImageCell()
-          .listRowSeparator(.hidden)
-        FeedImageCell()
-          .listRowSeparator(.hidden)
-        FeedImageCell()
-          .listRowSeparator(.hidden)
+      VStack {
+        Spacer()
+        List {
+          FeedImageCell()
+            .listRowSeparator(.hidden)
+          FeedImageCell()
+            .listRowSeparator(.hidden)
+          FeedImageCell()
+            .listRowSeparator(.hidden)
+          FeedImageCell()
+            .listRowSeparator(.hidden)
+          FeedImageCell()
+            .listRowSeparator(.hidden)
+        }
+        .listStyle(.plain)
+        Spacer()
       }
-      .listStyle(.plain)
         .toolbar {
           ToolbarItem(placement: .principal) {
             Text("My Feed")
