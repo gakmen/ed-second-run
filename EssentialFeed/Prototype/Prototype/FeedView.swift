@@ -15,31 +15,31 @@ struct FeedView: View {
 
   var body: some View {
     NavigationView {
-      VStack {
+      List {
         Spacer()
-        List {
-          FeedImageCell()
-            .listRowSeparator(.hidden)
-          FeedImageCell()
-            .listRowSeparator(.hidden)
-          FeedImageCell()
-            .listRowSeparator(.hidden)
-          FeedImageCell()
-            .listRowSeparator(.hidden)
-          FeedImageCell()
-            .listRowSeparator(.hidden)
-        }
-        .listStyle(.plain)
+          .listRowSeparator(.hidden)
+        FeedImageCell()
+          .listRowSeparator(.hidden)
+        FeedImageCell()
+          .listRowSeparator(.hidden)
+        FeedImageCell()
+          .listRowSeparator(.hidden)
+        FeedImageCell()
+          .listRowSeparator(.hidden)
+        FeedImageCell()
+          .listRowSeparator(.hidden)
         Spacer()
+          .listRowSeparator(.hidden)
       }
-        .toolbar {
-          ToolbarItem(placement: .principal) {
-            Text("My Feed")
-              .font(.system(size: 20, weight: .bold))
-              .foregroundColor(.primary)
-          }
+      .listStyle(.plain)
+      .toolbar {
+        ToolbarItem(placement: .principal) {
+          Text("My Feed")
+            .font(.system(size: 20, weight: .bold))
+            .foregroundColor(.primary)
         }
-        .navigationBarTitleDisplayMode(.inline)
+      }
+      .navigationBarTitleDisplayMode(.inline)
     }
   }
 }
