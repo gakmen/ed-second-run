@@ -7,6 +7,8 @@ struct FeedImageViewModel {
 }
 
 struct FeedView: View {
+  @State private var overlayOpacity: CGFloat = 1
+
   init() {
     let appearance = {
       $0.configureWithOpaqueBackground()
@@ -33,6 +35,19 @@ struct FeedView: View {
           .listRowSeparator(.hidden)
       }
       .listStyle(.plain)
+      .overlay {
+        GeometryReader { geo in
+          ZStack {
+            Color.white.edgesIgnoringSafeArea(.all).opacity(overlayOpacity)
+            ProgressView()
+              .progressViewStyle(.circular)
+              .offset(y: geo.safeAreaInsets.top + 43 - geo.size.height / 2)
+              .scaleEffect(1.5)
+              .opacity(overlayOpacity)
+          }
+        }
+      }
+      .refreshable {}
       .toolbar {
         ToolbarItem(placement: .principal) {
           Text("My Feed")
@@ -41,6 +56,13 @@ struct FeedView: View {
         }
       }
       .navigationBarTitleDisplayMode(.inline)
+    }
+    .onAppear {
+      DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+        withAnimation {
+          self.overlayOpacity = 0
+        }
+      }
     }
   }
 }
