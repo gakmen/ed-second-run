@@ -15,12 +15,24 @@
           "containerPath" : "container:EssentialFeed.xcodeproj",
           "identifier" : "72E38E782D384B1C00469630",
           "name" : "EssentialFeed"
+        },
+        {
+          "containerPath" : "container:EssentialFeed.xcodeproj",
+          "identifier" : "7269371B2D69CF80006F3852",
+          "name" : "EssentialFeediOS"
         }
       ]
     },
     "testExecutionOrdering" : "random"
   },
   "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:EssentialFeed.xcodeproj",
+        "identifier" : "726937222D69CF80006F3852",
+        "name" : "EssentialFeediOSTests"
+      }
+    },
     {
       "target" : {
         "containerPath" : "container:EssentialFeed.xcodeproj",

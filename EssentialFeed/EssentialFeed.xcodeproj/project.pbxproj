@@ -38,9 +38,10 @@
 
 /* Begin PBXFileReference section */
 		725930B82D4F54C400736DD2 /* EssentialFeedAPIEndToEndTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EssentialFeedAPIEndToEndTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		725930C22D4FC71E00736DD2 /* CI.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = CI.xctestplan; sourceTree = "<group>"; };
+		725930C22D4FC71E00736DD2 /* CI_macOS.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = CI_macOS.xctestplan; sourceTree = "<group>"; };
 		7269371C2D69CF80006F3852 /* EssentialFeediOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = EssentialFeediOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		726937232D69CF80006F3852 /* EssentialFeediOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EssentialFeediOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		726937352D69D3CB006F3852 /* CI_iOS.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = CI_iOS.xctestplan; sourceTree = "<group>"; };
 		72E38E792D384B1C00469630 /* EssentialFeed.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = EssentialFeed.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		72E38E812D384B1C00469630 /* EssentialFeedTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EssentialFeedTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -118,7 +119,8 @@
 		72E38E6F2D384B1C00469630 = {
 			isa = PBXGroup;
 			children = (
-				725930C22D4FC71E00736DD2 /* CI.xctestplan */,
+				725930C22D4FC71E00736DD2 /* CI_macOS.xctestplan */,
+				726937352D69D3CB006F3852 /* CI_iOS.xctestplan */,
 				72E38E7B2D384B1C00469630 /* EssentialFeed */,
 				72E38E852D384B1C00469630 /* EssentialFeedTests */,
 				725930B92D4F54C400736DD2 /* EssentialFeedAPIEndToEndTests */,
