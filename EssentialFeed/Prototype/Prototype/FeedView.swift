@@ -76,7 +76,7 @@ struct FeedImageCell: View {
           .resizable()
           .scaledToFill()
           .frame(width: squareSide, height: squareSide)
-          .clipShape(RoundedRectangle(cornerRadius: 22))
+          .simulateImageLoading()
       }
       .aspectRatio(1, contentMode: .fit)
 
