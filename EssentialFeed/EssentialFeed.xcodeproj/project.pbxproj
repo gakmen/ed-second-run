@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		725930BC2D4F54C400736DD2 /* EssentialFeed.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 72E38E792D384B1C00469630 /* EssentialFeed.framework */; };
 		726937242D69CF81006F3852 /* EssentialFeediOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7269371C2D69CF80006F3852 /* EssentialFeediOS.framework */; };
+		7281A8252D9092570048CD76 /* ViewInspector in Frameworks */ = {isa = PBXBuildFile; productRef = 7281A8242D9092570048CD76 /* ViewInspector */; };
 		72E38E822D384B1C00469630 /* EssentialFeed.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 72E38E792D384B1C00469630 /* EssentialFeed.framework */; };
 /* End PBXBuildFile section */
 
@@ -95,6 +96,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				726937242D69CF81006F3852 /* EssentialFeediOS.framework in Frameworks */,
+				7281A8252D9092570048CD76 /* ViewInspector in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -116,6 +118,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		7281A8232D9092570048CD76 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		72E38E6F2D384B1C00469630 = {
 			isa = PBXGroup;
 			children = (
@@ -126,6 +135,7 @@
 				725930B92D4F54C400736DD2 /* EssentialFeedAPIEndToEndTests */,
 				7269371D2D69CF80006F3852 /* EssentialFeediOS */,
 				726937272D69CF81006F3852 /* EssentialFeediOSTests */,
+				7281A8232D9092570048CD76 /* Frameworks */,
 				72E38E7A2D384B1C00469630 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -219,6 +229,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				7257DE942D85FC9F00BFD8B3 /* PBXTargetDependency */,
 				726937262D69CF81006F3852 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
@@ -226,6 +237,7 @@
 			);
 			name = EssentialFeediOSTests;
 			packageProductDependencies = (
+				7281A8242D9092570048CD76 /* ViewInspector */,
 			);
 			productName = EssentialFeediOSTests;
 			productReference = 726937232D69CF80006F3852 /* EssentialFeediOSTests.xctest */;
@@ -314,6 +326,9 @@
 			);
 			mainGroup = 72E38E6F2D384B1C00469630;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				7257DE922D85FBEB00BFD8B3 /* XCRemoteSwiftPackageReference "ViewInspector" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 72E38E7A2D384B1C00469630 /* Products */;
 			projectDirPath = "";
@@ -405,6 +420,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		7257DE942D85FC9F00BFD8B3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 7257DE932D85FC9F00BFD8B3 /* ViewInspector */;
+		};
 		725930BE2D4F54C400736DD2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 72E38E782D384B1C00469630 /* EssentialFeed */;
@@ -848,6 +867,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		7257DE922D85FBEB00BFD8B3 /* XCRemoteSwiftPackageReference "ViewInspector" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/nalexn/ViewInspector";
+			requirement = {
+				kind = exactVersion;
+				version = 0.10.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		7257DE932D85FC9F00BFD8B3 /* ViewInspector */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7257DE922D85FBEB00BFD8B3 /* XCRemoteSwiftPackageReference "ViewInspector" */;
+			productName = ViewInspector;
+		};
+		7281A8242D9092570048CD76 /* ViewInspector */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7257DE922D85FBEB00BFD8B3 /* XCRemoteSwiftPackageReference "ViewInspector" */;
+			productName = ViewInspector;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 72E38E702D384B1C00469630 /* Project object */;
 }
