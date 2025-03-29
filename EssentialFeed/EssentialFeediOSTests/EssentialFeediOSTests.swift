@@ -26,29 +26,33 @@ struct FeedView: View {
 
 class EssentialFeediOSXCTests: XCTestCase {
   func test_init_doesNotLoadFeed() {
-    let loader = LoaderSpy()
-    var _ = FeedView(loader: loader)
+    let (_, loader) = makeSUT()
     XCTAssertEqual(loader.loadCallCount, 0)
   }
 
   @MainActor
   func test_onAppear_loadsFeed() async throws {
-    let loader = LoaderSpy()
-    var sut = FeedView(loader: loader)
+    var (sut, loader) = makeSUT()
 
     let exp = expectation(description: "Wait for didAppear to be called")
-    sut.didAppear = { view in
+    sut.didAppear = { _ in
       XCTAssertEqual(loader.loadCallCount, 1)
       exp.fulfill()
     }
 
     ViewHosting.host(view: sut)
-    await fulfillment(of: [exp], timeout: 0.01)
+    await fulfillment(of: [exp], timeout: 0.1)
     ViewHosting.expel()
   }
 }
 
 //MARK: - Helpers
+
+private func makeSUT() -> (sut: FeedView, loader: LoaderSpy) {
+  let loaderSpy = LoaderSpy()
+  let sut = FeedView(loader: loaderSpy)
+  return (sut, loaderSpy)
+}
 
 class LoaderSpy: FeedLoader {
 
