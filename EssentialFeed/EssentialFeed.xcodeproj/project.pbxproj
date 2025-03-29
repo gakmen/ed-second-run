@@ -10,6 +10,7 @@
 		725930BC2D4F54C400736DD2 /* EssentialFeed.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 72E38E792D384B1C00469630 /* EssentialFeed.framework */; };
 		726937242D69CF81006F3852 /* EssentialFeediOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7269371C2D69CF80006F3852 /* EssentialFeediOS.framework */; };
 		7281A8252D9092570048CD76 /* ViewInspector in Frameworks */ = {isa = PBXBuildFile; productRef = 7281A8242D9092570048CD76 /* ViewInspector */; };
+		72C5B8872D93A46C005E8E5C /* EssentialFeed.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 72E38E792D384B1C00469630 /* EssentialFeed.framework */; platformFilter = ios; };
 		72E38E822D384B1C00469630 /* EssentialFeed.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 72E38E792D384B1C00469630 /* EssentialFeed.framework */; };
 /* End PBXBuildFile section */
 
@@ -88,6 +89,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				72C5B8872D93A46C005E8E5C /* EssentialFeed.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
