@@ -5,22 +5,35 @@ import XCTest
 
 struct FeedView: View {
   @State var loader: FeedLoader
-  var didAppear: ((Self) -> Void)?
+  var onDidAppear: ((Self) -> Void)?
+  var onDidRefresh: ((Self) -> Void)?
 
   init(loader: FeedLoader) {
     self.loader = loader
   }
 
   var body: some View {
-    Text("FeedView")
+    NavigationView {
+      List {}
+        .id(1)
+        .refreshable(action: refresh)
+    }
       .onAppear {
         Task {
           do {
             _ = try await loader.load()
-            self.didAppear?(self)
+            self.onDidAppear?(self)
           } catch {}
         }
       }
+  }
+
+  @Sendable
+  func refresh() async {
+    do {
+      _ = try await loader.load()
+      self.onDidRefresh?(self)
+    } catch {}
   }
 }
 
@@ -34,15 +47,22 @@ class EssentialFeediOSXCTests: XCTestCase {
   func test_onAppear_loadsFeed() async throws {
     var (sut, loader) = makeSUT()
 
-    let exp = expectation(description: "Wait for didAppear to be called")
-    sut.didAppear = { _ in
-      XCTAssertEqual(loader.loadCallCount, 1)
-      exp.fulfill()
-    }
+    let exp = sut.on(\.onDidAppear) { _ in XCTAssertEqual(loader.loadCallCount, 1) }
 
     ViewHosting.host(view: sut)
     await fulfillment(of: [exp], timeout: 0.1)
-    ViewHosting.expel()
+  }
+
+  @MainActor
+  func test_pullToRefresh_loadsFeed() async throws {
+    var (sut, loader) = makeSUT()
+
+    let appearExp = sut.on(\.onDidAppear) { _ in }
+    let refreshExp = sut.on(\.onDidRefresh) { _ in XCTAssertEqual(loader.loadCallCount, 2) }
+
+    ViewHosting.host(view: sut)
+    await sut.refresh()
+    await fulfillment(of: [appearExp, refreshExp], timeout: 0.1)
   }
 }
 
