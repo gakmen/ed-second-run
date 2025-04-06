@@ -4,7 +4,7 @@ import ViewInspector
 import XCTest
 
 struct FeedView: View {
-  @State var loader: FeedLoader
+  @State public var loader: FeedLoader
   var onDidAppear: ((Self) -> Void)?
   var onDidRefresh: ((Self) -> Void)?
 
@@ -15,7 +15,6 @@ struct FeedView: View {
   var body: some View {
     NavigationView {
       List {}
-        .id(1)
         .refreshable(action: refresh)
     }
       .onAppear {
@@ -74,8 +73,7 @@ private func makeSUT() -> (sut: FeedView, loader: LoaderSpy) {
   return (sut, loaderSpy)
 }
 
-class LoaderSpy: FeedLoader {
-
+final class LoaderSpy: FeedLoader, @unchecked Sendable {
   private(set) var loadCallCount = 0
 
   func load() async throws -> [EssentialFeed.FeedItem] {
