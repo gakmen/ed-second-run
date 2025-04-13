@@ -56,12 +56,25 @@ class EssentialFeediOSXCTests: XCTestCase {
   func test_pullToRefresh_loadsFeed() async throws {
     var (sut, loader) = makeSUT()
 
-    let appearExp = sut.on(\.onDidAppear) { _ in }
-    let refreshExp = sut.on(\.onDidRefresh) { _ in XCTAssertEqual(loader.loadCallCount, 2) }
+    let appear = sut.on(\.onDidAppear) { _ in }
+    let pullToRefresh = sut.on(\.onDidRefresh) { _ in XCTAssertEqual(loader.loadCallCount, 2) }
 
     ViewHosting.host(view: sut)
     await sut.refresh()
-    await fulfillment(of: [appearExp, refreshExp], timeout: 0.1)
+    await fulfillment(of: [appear, pullToRefresh], timeout: 0.1)
+  }
+
+  @MainActor
+  func test_pullToRefreshTwice_loadsFeedTwice() async throws {
+    var (sut, loader) = makeSUT()
+
+    let appear = sut.on(\.onDidAppear) { _ in }
+    let pullToRefreshTwice = sut.on(\.onDidRefresh) { _ in XCTAssertEqual(loader.loadCallCount, 3) }
+
+    ViewHosting.host(view: sut)
+    await sut.refresh()
+    await sut.refresh()
+    await fulfillment(of: [appear, pullToRefreshTwice], timeout: 0.1)
   }
 }
 
