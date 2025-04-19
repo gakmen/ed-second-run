@@ -38,7 +38,8 @@ struct FeedView: View {
       .overlay {
         GeometryReader { geo in
           ZStack {
-            Color.white.edgesIgnoringSafeArea(.all).opacity(overlayOpacity)
+            Color.white.edgesIgnoringSafeArea(.all)
+              .opacity(overlayOpacity)
             ProgressView()
               .progressViewStyle(.circular)
               .offset(y: geo.safeAreaInsets.top + 43 - geo.size.height / 2)

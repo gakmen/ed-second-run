@@ -16,6 +16,11 @@ struct FeedView: View {
     NavigationView {
       List {}
         .refreshable(action: refresh)
+        .overlay {
+          ProgressView()
+            .id("loading indicator")
+            .opacity(1)
+        }
     }
       .onAppear {
         Task {
@@ -43,7 +48,7 @@ class EssentialFeediOSXCTests: XCTestCase {
   }
 
   @MainActor
-  func test_onAppear_loadsFeed() async throws {
+  func test_onAppear_loadsFeed() async {
     var (sut, loader) = makeSUT()
 
     let exp = sut.on(\.onDidAppear) { _ in XCTAssertEqual(loader.loadCallCount, 1) }
@@ -53,7 +58,7 @@ class EssentialFeediOSXCTests: XCTestCase {
   }
 
   @MainActor
-  func test_pullToRefresh_loadsFeed() async throws {
+  func test_pullToRefresh_loadsFeed() async {
     var (sut, loader) = makeSUT()
 
     let appear = sut.on(\.onDidAppear) { _ in }
@@ -65,7 +70,7 @@ class EssentialFeediOSXCTests: XCTestCase {
   }
 
   @MainActor
-  func test_pullToRefreshTwice_loadsFeedTwice() async throws {
+  func test_pullToRefreshTwice_loadsFeedTwice() async {
     var (sut, loader) = makeSUT()
 
     let appear = sut.on(\.onDidAppear) { _ in }
@@ -75,6 +80,18 @@ class EssentialFeediOSXCTests: XCTestCase {
     await sut.refresh()
     await sut.refresh()
     await fulfillment(of: [appear, pullToRefreshTwice], timeout: 0.1)
+  }
+
+  @MainActor
+  func test_onAppear_showsLoadingIndicator() async throws {
+    var (sut, _) = makeSUT()
+
+    let appear = sut.on(\.onDidAppear) { view in
+      let indicator = try view.find(viewWithId: "loading indicator")
+      XCTAssertTrue(try indicator.opacity() != 0)
+    }
+    ViewHosting.host(view: sut)
+    await fulfillment(of: [appear], timeout: 0.1)
   }
 }
 
