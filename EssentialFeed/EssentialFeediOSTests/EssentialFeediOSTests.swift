@@ -48,13 +48,14 @@ struct FeedView: View {
   }
 }
 
+@MainActor
 class EssentialFeediOSXCTests: XCTestCase {
   func test_init_doesNotLoadFeed() {
     let (_, loader) = makeSUT()
     XCTAssertEqual(loader.loadCallCount, 0)
   }
 
-  @MainActor
+
   func test_onAppear_loadsFeed() async {
     var (sut, loader) = makeSUT()
 
@@ -64,7 +65,6 @@ class EssentialFeediOSXCTests: XCTestCase {
     await fulfillment(of: [exp], timeout: 0.1)
   }
 
-  @MainActor
   func test_pullToRefresh_loadsFeed() async {
     var (sut, loader) = makeSUT()
 
@@ -75,7 +75,6 @@ class EssentialFeediOSXCTests: XCTestCase {
     await fulfillment(of: [pullToRefresh], timeout: 0.1)
   }
 
-  @MainActor
   func test_pullToRefreshTwice_loadsFeedTwice() async {
     var (sut, loader) = makeSUT()
 
@@ -87,7 +86,6 @@ class EssentialFeediOSXCTests: XCTestCase {
     await fulfillment(of: [pullToRefreshTwice], timeout: 0.1)
   }
 
-  @MainActor
   func test_onAppear_showsLoadingIndicator() async throws {
     var (sut, _) = makeSUT()
 
@@ -99,7 +97,6 @@ class EssentialFeediOSXCTests: XCTestCase {
     await fulfillment(of: [appear], timeout: 0.1)
   }
 
-  @MainActor
   func test_onChange_hidesLoadingIndicatorOnLoaderCompletion() async throws {
     var (sut, _) = makeSUT()
 
