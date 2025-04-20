@@ -5,8 +5,11 @@ import XCTest
 
 struct FeedView: View {
   @State public var loader: FeedLoader
+  @State public var feed: [FeedItem]?
+  @State private var loadingIndicatorOpacity: CGFloat = 1
   var onDidAppear: ((Self) -> Void)?
   var onDidRefresh: ((Self) -> Void)?
+  var onFeedChange: ((Self) -> Void)?
 
   init(loader: FeedLoader) {
     self.loader = loader
@@ -19,17 +22,21 @@ struct FeedView: View {
         .overlay {
           ProgressView()
             .id("loading indicator")
-            .opacity(1)
+            .opacity(loadingIndicatorOpacity)
         }
     }
-      .onAppear {
-        Task {
-          do {
-            _ = try await loader.load()
-            self.onDidAppear?(self)
-          } catch {}
-        }
+    .onAppear {
+      Task {
+        do {
+          self.onDidAppear?(self)
+          feed = try await loader.load()
+        } catch {}
       }
+    }
+    .onChange(of: feed) { _, newValue in
+      if newValue != nil { withAnimation { loadingIndicatorOpacity = 0 } }
+      onFeedChange?(self)
+    }
   }
 
   @Sendable
@@ -89,6 +96,18 @@ class EssentialFeediOSXCTests: XCTestCase {
     let appear = sut.on(\.onDidAppear) { view in
       let indicator = try view.find(viewWithId: "loading indicator")
       XCTAssertTrue(try indicator.opacity() != 0)
+    }
+    ViewHosting.host(view: sut)
+    await fulfillment(of: [appear], timeout: 0.1)
+  }
+
+  @MainActor
+  func test_onChange_hidesLoadingIndicatorOnLoaderCompletion() async throws {
+    var (sut, _) = makeSUT()
+
+    let appear = sut.on(\.onFeedChange) { view in
+      let indicator = try view.find(viewWithId: "loading indicator")
+      XCTAssertTrue(try indicator.opacity() == 0)
     }
     ViewHosting.host(view: sut)
     await fulfillment(of: [appear], timeout: 0.1)
