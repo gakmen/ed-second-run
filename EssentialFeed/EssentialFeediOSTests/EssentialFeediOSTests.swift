@@ -8,8 +8,8 @@ struct FeedView: View {
   @State public var feed: [FeedItem]?
   @State private var loadingIndicatorOpacity: CGFloat = 1
   var onDidAppear: ((Self) -> Void)?
-  var onDidRefresh: ((Self) -> Void)?
   var onFeedChange: ((Self) -> Void)?
+  var onFinishRefreshing: ((Self) -> Void)?
 
   init(loader: FeedLoader) {
     self.loader = loader
@@ -27,10 +27,8 @@ struct FeedView: View {
     }
     .onAppear {
       Task {
-        do {
-          self.onDidAppear?(self)
-          feed = try await loader.load()
-        } catch {}
+        self.onDidAppear?(self)
+        await refresh()
       }
     }
     .onChange(of: feed) { _, newValue in
@@ -42,8 +40,8 @@ struct FeedView: View {
   @Sendable
   func refresh() async {
     do {
-      _ = try await loader.load()
-      self.onDidRefresh?(self)
+      feed = try await loader.load()
+      self.onFinishRefreshing?(self)
     } catch {}
   }
 }
@@ -68,7 +66,7 @@ class EssentialFeediOSXCTests: XCTestCase {
   func test_pullToRefresh_loadsFeed() async {
     var (sut, loader) = makeSUT()
 
-    let pullToRefresh = sut.on(\.onDidRefresh) { _ in XCTAssertEqual(loader.loadCallCount, 2) }
+    let pullToRefresh = sut.on(\.onFinishRefreshing) { _ in XCTAssertEqual(loader.loadCallCount, 2) }
 
     ViewHosting.host(view: sut)
     await sut.refresh()
@@ -78,7 +76,7 @@ class EssentialFeediOSXCTests: XCTestCase {
   func test_pullToRefreshTwice_loadsFeedTwice() async {
     var (sut, loader) = makeSUT()
 
-    let pullToRefreshTwice = sut.on(\.onDidRefresh) { _ in XCTAssertEqual(loader.loadCallCount, 3) }
+    let pullToRefreshTwice = sut.on(\.onFinishRefreshing) { _ in XCTAssertEqual(loader.loadCallCount, 3) }
 
     ViewHosting.host(view: sut)
     await sut.refresh()
