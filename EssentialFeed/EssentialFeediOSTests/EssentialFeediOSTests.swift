@@ -1,47 +1,8 @@
 import EssentialFeed
+import EssentialFeediOS
 import SwiftUI
 import ViewInspector
 import XCTest
-
-struct FeedView: View {
-  @State public var loader: FeedLoader
-  @State public var feed: [FeedItem]?
-  @State private var loadingIndicatorOpacity: CGFloat = 1
-  var onDidAppear: ((Self) -> Void)?
-  var onFeedChange: ((Self) -> Void)?
-  var onFinishRefreshing: ((Self) -> Void)?
-
-  init(loader: FeedLoader) {
-    self.loader = loader
-  }
-
-  var body: some View {
-    NavigationView {
-      List {}
-        .refreshable(action: refresh)
-        .overlay {
-          ProgressView()
-            .id("loading indicator")
-            .opacity(loadingIndicatorOpacity)
-        }
-    }
-    .onAppear {
-      Task {
-        self.onDidAppear?(self)
-        await refresh()
-      }
-    }
-  }
-
-  @Sendable
-  func refresh() async {
-    do {
-      feed = try await loader.load()
-      withAnimation { loadingIndicatorOpacity = 0 }
-      self.onFinishRefreshing?(self)
-    } catch {}
-  }
-}
 
 @MainActor
 class EssentialFeediOSXCTests: XCTestCase {
