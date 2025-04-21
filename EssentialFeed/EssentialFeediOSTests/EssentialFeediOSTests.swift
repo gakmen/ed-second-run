@@ -63,7 +63,7 @@ class EssentialFeediOSXCTests: XCTestCase {
     await fulfillment(of: [exp], timeout: 0.1)
   }
 
-  func test_pullToRefresh_loadsFeed() async {
+  func test_userInitiatedFeedReload_loadsFeed() async {
     var (sut, loader) = makeSUT()
 
     let pullToRefresh = sut.on(\.onFinishRefreshing) { _ in XCTAssertEqual(loader.loadCallCount, 2) }
@@ -73,7 +73,7 @@ class EssentialFeediOSXCTests: XCTestCase {
     await fulfillment(of: [pullToRefresh], timeout: 0.1)
   }
 
-  func test_pullToRefreshTwice_loadsFeedTwice() async {
+  func test_userInitiatedFeedReloadTwice_loadsFeedTwice() async {
     var (sut, loader) = makeSUT()
 
     let pullToRefreshTwice = sut.on(\.onFinishRefreshing) { _ in XCTAssertEqual(loader.loadCallCount, 3) }
@@ -88,8 +88,7 @@ class EssentialFeediOSXCTests: XCTestCase {
     var (sut, _) = makeSUT()
 
     let appear = sut.on(\.onDidAppear) { view in
-      let indicator = try view.find(viewWithId: "loading indicator")
-      XCTAssertTrue(try indicator.opacity() != 0)
+      XCTAssertTrue(try isShowingLoadingIndicator(for: view))
     }
     ViewHosting.host(view: sut)
     await fulfillment(of: [appear], timeout: 0.1)
@@ -99,8 +98,7 @@ class EssentialFeediOSXCTests: XCTestCase {
     var (sut, _) = makeSUT()
 
     let appear = sut.on(\.onFeedChange) { view in
-      let indicator = try view.find(viewWithId: "loading indicator")
-      XCTAssertTrue(try indicator.opacity() == 0)
+      XCTAssertFalse(try isShowingLoadingIndicator(for: view))
     }
     ViewHosting.host(view: sut)
     await fulfillment(of: [appear], timeout: 0.1)
@@ -113,6 +111,11 @@ private func makeSUT() -> (sut: FeedView, loader: LoaderSpy) {
   let loaderSpy = LoaderSpy()
   let sut = FeedView(loader: loaderSpy)
   return (sut, loaderSpy)
+}
+
+private func isShowingLoadingIndicator(for view: InspectableView<ViewType.View<FeedView>>) throws -> Bool {
+  let indicator = try view.find(viewWithId: "loading indicator")
+  return try indicator.opacity() != 0
 }
 
 final class LoaderSpy: FeedLoader, @unchecked Sendable {
