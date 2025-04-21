@@ -53,35 +53,23 @@ class EssentialFeediOSXCTests: XCTestCase {
     XCTAssertEqual(loader.loadCallCount, 0)
   }
 
-
-  func test_onAppear_loadsFeed() async {
+  func test_loadFeedActions_requestFeedFromLoader() async {
     var (sut, loader) = makeSUT()
 
-    let exp = sut.on(\.onDidAppear) { _ in XCTAssertEqual(loader.loadCallCount, 1) }
-
+    let viewAppears = sut.on(\.onFinishRefreshing)
+    { _ in XCTAssertEqual(loader.loadCallCount, 1) }
     ViewHosting.host(view: sut)
-    await fulfillment(of: [exp], timeout: 0.1)
-  }
+    await fulfillment(of: [viewAppears], timeout: 0.1)
 
-  func test_userInitiatedFeedReload_loadsFeed() async {
-    var (sut, loader) = makeSUT()
-
-    let pullToRefresh = sut.on(\.onFinishRefreshing) { _ in XCTAssertEqual(loader.loadCallCount, 2) }
-
-    ViewHosting.host(view: sut)
+    let firstUserInitiatedReload = sut.on(\.onFinishRefreshing)
+    { _ in XCTAssertEqual(loader.loadCallCount, 2) }
     await sut.refresh()
-    await fulfillment(of: [pullToRefresh], timeout: 0.1)
-  }
+    await fulfillment(of: [firstUserInitiatedReload], timeout: 0.1)
 
-  func test_userInitiatedFeedReloadTwice_loadsFeedTwice() async {
-    var (sut, loader) = makeSUT()
-
-    let pullToRefreshTwice = sut.on(\.onFinishRefreshing) { _ in XCTAssertEqual(loader.loadCallCount, 3) }
-
-    ViewHosting.host(view: sut)
+    let secondUserInitiatedReload = sut.on(\.onFinishRefreshing)
+    { _ in XCTAssertEqual(loader.loadCallCount, 3) }
     await sut.refresh()
-    await sut.refresh()
-    await fulfillment(of: [pullToRefreshTwice], timeout: 0.1)
+    await fulfillment(of: [secondUserInitiatedReload], timeout: 0.1)
   }
 
   func test_onAppear_showsLoadingIndicator() async throws {
@@ -113,7 +101,9 @@ private func makeSUT() -> (sut: FeedView, loader: LoaderSpy) {
   return (sut, loaderSpy)
 }
 
-private func isShowingLoadingIndicator(for view: InspectableView<ViewType.View<FeedView>>) throws -> Bool {
+private func isShowingLoadingIndicator(
+  for view: InspectableView<ViewType.View<FeedView>>
+) throws -> Bool {
   let indicator = try view.find(viewWithId: "loading indicator")
   return try indicator.opacity() != 0
 }
