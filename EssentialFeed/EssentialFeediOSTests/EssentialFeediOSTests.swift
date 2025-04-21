@@ -31,16 +31,13 @@ struct FeedView: View {
         await refresh()
       }
     }
-    .onChange(of: feed) { _, newValue in
-      if newValue != nil { withAnimation { loadingIndicatorOpacity = 0 } }
-      onFeedChange?(self)
-    }
   }
 
   @Sendable
   func refresh() async {
     do {
       feed = try await loader.load()
+      withAnimation { loadingIndicatorOpacity = 0 }
       self.onFinishRefreshing?(self)
     } catch {}
   }
@@ -72,24 +69,18 @@ class EssentialFeediOSXCTests: XCTestCase {
     await fulfillment(of: [secondUserInitiatedReload], timeout: 0.1)
   }
 
-  func test_onAppear_showsLoadingIndicator() async throws {
+  func test_loadingFeedIndicator_isVisibleOnlyWhileLoadingFeed() async throws {
     var (sut, _) = makeSUT()
 
-    let appear = sut.on(\.onDidAppear) { view in
+    let viewAppears = sut.on(\.onDidAppear) { view in
       XCTAssertTrue(try isShowingLoadingIndicator(for: view))
     }
-    ViewHosting.host(view: sut)
-    await fulfillment(of: [appear], timeout: 0.1)
-  }
-
-  func test_onChange_hidesLoadingIndicatorOnLoaderCompletion() async throws {
-    var (sut, _) = makeSUT()
-
-    let appear = sut.on(\.onFeedChange) { view in
+    let feedLoadingCompletes = sut.on(\.onFinishRefreshing) { view in
       XCTAssertFalse(try isShowingLoadingIndicator(for: view))
     }
+
     ViewHosting.host(view: sut)
-    await fulfillment(of: [appear], timeout: 0.1)
+    await fulfillment(of: [viewAppears, feedLoadingCompletes])
   }
 }
 
