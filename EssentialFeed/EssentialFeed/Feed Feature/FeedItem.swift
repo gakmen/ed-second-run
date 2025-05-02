@@ -1,6 +1,6 @@
 import Foundation
 
-public struct FeedItem: Equatable {
+public struct FeedItem: Equatable, Hashable {
   public let id: UUID
   public let description: String?
   public let location: String?

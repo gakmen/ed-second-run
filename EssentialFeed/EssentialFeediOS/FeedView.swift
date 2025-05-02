@@ -2,11 +2,10 @@ import SwiftUI
 import EssentialFeed
 
 public struct FeedView: View {
-  @State public var loader: FeedLoader
+  public var loader: FeedLoader
   @State public var feed: [FeedItem]?
   @State private var loadingIndicatorOpacity: CGFloat = 1
   public var onDidAppear: ((Self) -> Void)?
-  public var onFeedChange: ((Self) -> Void)?
   public var onFinishRefreshing: ((Self) -> Void)?
 
   public init(loader: FeedLoader) {
@@ -15,13 +14,37 @@ public struct FeedView: View {
 
   public var body: some View {
     NavigationView {
-      List {}
-        .refreshable(action: refresh)
-        .overlay {
-          ProgressView()
-            .id("loading indicator")
-            .opacity(loadingIndicatorOpacity)
+      List {
+        ForEach(feed ?? [], id: \.self) { item in
+          VStack(alignment: .leading, spacing: 10) {
+            if let location = item.location {
+              HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text(location)
+                  .id("location")
+                  .font(.system(size: 15))
+                  .foregroundStyle(.tertiary)
+                  .lineLimit(2)
+                Spacer()
+              }
+            }
+
+            if let description = item.description {
+              Text(description)
+                .id("description")
+                .lineLimit(6)
+                .font(.system(size: 16))
+                .foregroundStyle(.secondary)
+            }
+          }
         }
+      }
+      .refreshable(action: refresh)
+      .listStyle(.plain)
+      .overlay {
+        ProgressView()
+          .id("loading indicator")
+          .opacity(loadingIndicatorOpacity)
+      }
     }
     .onAppear {
       Task {
@@ -34,7 +57,8 @@ public struct FeedView: View {
   @Sendable
   public func refresh() async {
     do {
-      feed = try await loader.load()
+      let newFeed = try await loader.load()
+      feed = newFeed
       withAnimation { loadingIndicatorOpacity = 0 }
       self.onFinishRefreshing?(self)
     } catch {}
