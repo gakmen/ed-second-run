@@ -11,28 +11,28 @@ class EssentialFeediOSXCTests: XCTestCase {
     XCTAssertEqual(loader.loadCallCount, 0)
   }
 
-  func test_loadFeedActions_requestFeedFromLoader() async throws {
+  func test_loadFeedActions_requestFeedFromLoader() async {
     let (sut, loader) = makeSUT()
 
-    try await sut.refresh()
+    await sut.refresh()
     XCTAssertEqual(loader.loadCallCount, 1)
 
-    try await sut.refresh()
+    await sut.refresh()
     XCTAssertEqual(loader.loadCallCount, 2)
 
-    try await sut.refresh()
+    await sut.refresh()
     XCTAssertEqual(loader.loadCallCount, 3)
   }
 
-  func test_loadingFeedIndicator_isInvisibleOnRefreshCompletion() async throws {
+  func test_loadingFeedIndicator_isInvisibleOnRefreshCompletion() async {
     let (sut, _) = makeSUT()
 
     XCTAssertTrue(sut.showLoadingIndicator)
-    try await sut.refresh()
+    await sut.refresh()
     XCTAssertFalse(sut.showLoadingIndicator)
   }
 
-  func test_loadFeedCompletion_rendersSuccessfullyLoadedFeed() async throws {
+  func test_loadFeedCompletion_rendersSuccessfullyLoadedFeed() async {
     let (sut, loader) = makeSUT()
     let expectedItem0 = makeItem(description: "a description", location: "a location")
     let expectedItem1 = makeItem(description: nil, location: "another location")
@@ -46,16 +46,28 @@ class EssentialFeediOSXCTests: XCTestCase {
 
     let expectedFeedOnFirstLoad = [expectedItem0]
     loader.feedStub = expectedFeedOnFirstLoad
-    try await sut.refresh()
+    await sut.refresh()
     let receivedFeedOnFirstLoad = sut.feed
     assertThat(receivedFeedOnFirstLoad, isEqualTo: expectedFeedOnFirstLoad)
 
     let expectedFeedOnSecondLoad = [expectedItem0, expectedItem1, expectedItem2, expectedItem3]
     loader.feedStub = expectedFeedOnSecondLoad
-    try await sut.refresh()
+    await sut.refresh()
     let receivedFeedOnSecondLoad = sut.feed
     assertThat(receivedFeedOnSecondLoad, isEqualTo: expectedFeedOnSecondLoad)
+  }
 
+  func test_loadFeedCompletion_doesNotAlterCurrentRenderingStateOnError() async {
+    let (sut, loader) = makeSUT()
+    let expectedItems = [makeItem()]
+
+    loader.feedStub = expectedItems
+    await sut.refresh()
+    assertThat(sut.feed, isEqualTo: expectedItems)
+
+    loader.errorStub = NSError(domain: "an error", code: 0)
+    await sut.refresh()
+    assertThat(sut.feed, isEqualTo: expectedItems)
   }
 }
 
@@ -99,9 +111,14 @@ private func assertThat(
 final class LoaderSpy: FeedLoader, @unchecked Sendable {
   private(set) var loadCallCount = 0
   var feedStub = [FeedItem]()
+  var errorStub: Error?
 
   func load() async throws -> [EssentialFeed.FeedItem] {
     loadCallCount += 1
-    return feedStub
+    if let errorStub {
+      throw errorStub
+    } else {
+      return feedStub
+    }
   }
 }
