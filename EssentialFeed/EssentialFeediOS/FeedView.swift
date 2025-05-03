@@ -1,5 +1,14 @@
+import Combine
 import SwiftUI
 import EssentialFeed
+
+final public class FeedViewModel: ObservableObject {
+  public var loader: FeedLoader
+
+  public init(loader: FeedLoader) {
+    self.loader = loader
+  }
+}
 
 public struct FeedView: View {
   public var loader: FeedLoader

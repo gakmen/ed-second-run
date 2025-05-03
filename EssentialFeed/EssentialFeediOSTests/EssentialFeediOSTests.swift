@@ -7,7 +7,7 @@ import XCTest
 @MainActor
 class EssentialFeediOSXCTests: XCTestCase {
   func test_init_doesNotLoadFeed() {
-    let (_, loader) = makeSUT()
+    let (_, loader) = makeSUTOfModel()
     XCTAssertEqual(loader.loadCallCount, 0)
   }
 
@@ -75,6 +75,12 @@ class EssentialFeediOSXCTests: XCTestCase {
 private func makeSUT() -> (sut: FeedView, loader: LoaderSpy) {
   let loaderSpy = LoaderSpy()
   let sut = FeedView(loader: loaderSpy)
+  return (sut, loaderSpy)
+}
+
+private func makeSUTOfModel() -> (sut: FeedViewModel, loader: LoaderSpy) {
+  let loaderSpy = LoaderSpy()
+  let sut = FeedViewModel(loader: loaderSpy)
   return (sut, loaderSpy)
 }
 
