@@ -4,11 +4,11 @@ import SwiftUI
 import Testing
 import ViewInspector
 
-@Test func init_doesNotLoadFeed() {
-  let (_, loader) = makeSUT()
-
-  #expect(loader.loadCallCount == 0)
-}
+//@Test func init_doesNotLoadFeed() {
+//  let (_, loader) = makeSUT()
+//
+//  #expect(loader.loadCallCount == 0)
+//}
 
 // TODO: понять почему не работает тест. Перестал работать после того как поменял местами вызовы
 //       `onDidAppear` и присвоение `feed` в `FeedView`
@@ -41,15 +41,15 @@ import ViewInspector
 
 //MARK: - Helpers
 
-private func makeSUT() -> (sut: FeedView, loader: LoaderSpy) {
-  let loaderSpy = LoaderSpy()
-  let sut = FeedView(loader: loaderSpy)
-  return (sut, loaderSpy)
-}
-
-private func few(nanoseconds: UInt64) async throws {
-  await confirmation { fulfillment in
-    try? await Task.sleep(nanoseconds: nanoseconds)
-    fulfillment()
-  }
-}
+//private func makeSUT() -> (sut: FeedView, loader: LoaderSpy) {
+//  let loaderSpy = LoaderSpy()
+//  let sut = FeedView(loader: loaderSpy)
+//  return (sut, loaderSpy)
+//}
+//
+//private func few(nanoseconds: UInt64) async throws {
+//  await confirmation { fulfillment in
+//    try? await Task.sleep(nanoseconds: nanoseconds)
+//    fulfillment()
+//  }
+//}

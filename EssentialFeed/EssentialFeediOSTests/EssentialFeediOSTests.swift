@@ -25,9 +25,10 @@ class EssentialFeediOSXCTests: XCTestCase {
   }
 
   func test_loadingFeedIndicator_isInvisibleOnRefreshCompletion() async {
-    let (sut, _) = makeSUT()
+    let (sut, loader) = makeSUT()
 
     XCTAssertTrue(sut.showLoadingIndicator)
+    loader.errorStub = error
     await sut.refresh()
     XCTAssertFalse(sut.showLoadingIndicator)
   }
@@ -65,13 +66,14 @@ class EssentialFeediOSXCTests: XCTestCase {
     await sut.refresh()
     assertThat(sut.feed, isEqualTo: expectedItems)
 
-    loader.errorStub = NSError(domain: "an error", code: 0)
+    loader.errorStub = error
     await sut.refresh()
     assertThat(sut.feed, isEqualTo: expectedItems)
   }
 }
 
 //MARK: - Helpers
+private let error = NSError(domain: "an error", code: 0)
 
 private func makeSUT() -> (sut: FeedViewModel, loader: LoaderSpy) {
   let loaderSpy = LoaderSpy()
