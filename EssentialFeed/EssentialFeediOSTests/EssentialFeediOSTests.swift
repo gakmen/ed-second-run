@@ -7,12 +7,12 @@ import XCTest
 @MainActor
 class EssentialFeediOSXCTests: XCTestCase {
   func test_init_doesNotLoadFeed() {
-    let (_, loader) = makeSUTOfModel()
+    let (_, loader) = makeSUT()
     XCTAssertEqual(loader.loadCallCount, 0)
   }
 
   func test_loadFeedActions_requestFeedFromLoader() async throws {
-    let (sut, loader) = makeSUTOfModel()
+    let (sut, loader) = makeSUT()
 
     try await sut.refresh()
     XCTAssertEqual(loader.loadCallCount, 1)
@@ -25,7 +25,7 @@ class EssentialFeediOSXCTests: XCTestCase {
   }
 
   func test_loadingFeedIndicator_isInvisibleOnRefreshCompletion() async throws {
-    let (sut, _) = makeSUTOfModel()
+    let (sut, _) = makeSUT()
 
     XCTAssertTrue(sut.showLoadingIndicator)
     try await sut.refresh()
@@ -33,50 +33,38 @@ class EssentialFeediOSXCTests: XCTestCase {
   }
 
   func test_loadFeedCompletion_rendersSuccessfullyLoadedFeed() async throws {
-    var (sut, loader) = makeSUT()
+    let (sut, loader) = makeSUT()
     let expectedItem0 = makeItem(description: "a description", location: "a location")
     let expectedItem1 = makeItem(description: nil, location: "another location")
     let expectedItem2 = makeItem(description: "another description", location: nil)
     let expectedItem3 = makeItem(description: nil, location: nil)
 
-    // First load
-    loader.feedStub = [expectedItem0]
-    let feedLoadingCompletes = sut.on(\.onFinishRefreshing) { view in
-      assertThat(view, isRendering: [expectedItem0])
-    }
-    ViewHosting.host(view: sut)
-    await fulfillment(of: [feedLoadingCompletes])
+    let expectedFeed = [FeedItem]()
+    loader.feedStub = expectedFeed
+    let receivedFeed = sut.feed
+    assertThat(receivedFeed, isEqualTo: expectedFeed)
 
-    // Second load
-    let expectedItems = [expectedItem0, expectedItem1, expectedItem2, expectedItem3]
-    loader.feedStub = expectedItems
-    let userInitiatedReloadCompletes = sut.on(\.onFinishRefreshing) { view in
-      assertThat(view, isRendering: expectedItems)
-    }
-    ViewHosting.host(view: sut)
-    await fulfillment(of: [userInitiatedReloadCompletes])
+    let expectedFeedOnFirstLoad = [expectedItem0]
+    loader.feedStub = expectedFeedOnFirstLoad
+    try await sut.refresh()
+    let receivedFeedOnFirstLoad = sut.feed
+    assertThat(receivedFeedOnFirstLoad, isEqualTo: expectedFeedOnFirstLoad)
+
+    let expectedFeedOnSecondLoad = [expectedItem0, expectedItem1, expectedItem2, expectedItem3]
+    loader.feedStub = expectedFeedOnSecondLoad
+    try await sut.refresh()
+    let receivedFeedOnSecondLoad = sut.feed
+    assertThat(receivedFeedOnSecondLoad, isEqualTo: expectedFeedOnSecondLoad)
+
   }
 }
 
 //MARK: - Helpers
 
-private func makeSUT() -> (sut: FeedView, loader: LoaderSpy) {
-  let loaderSpy = LoaderSpy()
-  let sut = FeedView(loader: loaderSpy)
-  return (sut, loaderSpy)
-}
-
-private func makeSUTOfModel() -> (sut: FeedViewModel, loader: LoaderSpy) {
+private func makeSUT() -> (sut: FeedViewModel, loader: LoaderSpy) {
   let loaderSpy = LoaderSpy()
   let sut = FeedViewModel(loader: loaderSpy)
   return (sut, loaderSpy)
-}
-
-private func isShowingLoadingIndicator(
-  for view: InspectableView<ViewType.View<FeedView>>
-) throws -> Bool {
-  let indicator = try view.find(viewWithId: "loading indicator")
-  return try indicator.opacity() != 0
 }
 
 private func makeItem(
@@ -88,78 +76,23 @@ private func makeItem(
 }
 
 private func assertThat(
-  _ view: InspectableView<ViewType.View<FeedView>>,
-  isRendering expectedItems: [FeedItem],
+  _ receivedFeed: [FeedItem],
+  isEqualTo expectedFeed: [FeedItem],
   file: StaticString = #file,
   line: UInt = #line
 ) {
-  let itemViews = view.findAll(ViewType.VStack.self)
-  XCTAssertEqual(itemViews.count, expectedItems.count, file: file, line: line)
-  expectedItems.indices.forEach { index in
-    assertThat(itemViews, contain: expectedItems, at: index)
-  }
-}
-
-private func assertThat(
-  _ itemViews: [InspectableView<ViewType.VStack>],
-  contain expectedItems: [FeedItem],
-  at index: Int,
-  file: StaticString = #file,
-  line: UInt = #line
-) {
-  assertProperty(
-    in: itemViews,
-    expectedItems: expectedItems,
-    at: index,
-    viewId: "location",
-    expected: expectedItems[index].location,
-    propertyName: "location",
+  XCTAssertEqual(
+    receivedFeed.count,
+    expectedFeed.count,
+    "Expected to receive \(expectedFeed.count) items, got \(receivedFeed.count) instead.",
     file: file,
     line: line
   )
-
-  assertProperty(
-    in: itemViews,
-    expectedItems: expectedItems,
-    at: index,
-    viewId: "description",
-    expected: expectedItems[index].description,
-    propertyName: "description",
-    file: file,
-    line: line
-  )
-}
-
-private func assertProperty(
-  in itemViews: [InspectableView<ViewType.VStack>],
-  expectedItems: [FeedItem],
-  at index: Int,
-  viewId: String,
-  expected: String?,
-  propertyName: String,
-  file: StaticString = #file,
-  line: UInt = #line
-) {
-  if let receivedValue = try? itemViews[index].find(viewWithId: viewId).text().string() {
-    XCTAssertEqual(
-      receivedValue, expected,
-            """
-            Expected \(propertyName) text at index: \(index) to be: \(receivedValue), 
-            got \(String(describing: expected)) instead
-            """,
-      file: file,
-      line: line
-    )
-  } else {
-    XCTAssertNil(
-      expected,
-            """
-            Expected NO \(propertyName) text at index: \(index),
-            got \(String(describing: expected)) instead
-            """,
-      file: file,
-      line: line
-    )
+  receivedFeed.enumerated().forEach { index, receivedItem in
+    XCTAssertEqual(receivedItem.id, expectedFeed[index].id, file: file, line: line)
+    XCTAssertEqual(receivedItem.description, expectedFeed[index].description, file: file, line: line)
+    XCTAssertEqual(receivedItem.location, expectedFeed[index].location, file: file, line: line)
+    XCTAssertEqual(receivedFeed[index].imageURL, expectedFeed[index].imageURL, file: file, line: line)
   }
 }
 

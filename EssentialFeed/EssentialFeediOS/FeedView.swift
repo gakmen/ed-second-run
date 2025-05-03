@@ -5,13 +5,14 @@ import EssentialFeed
 final public class FeedViewModel: ObservableObject {
   public var loader: FeedLoader
   public var showLoadingIndicator: Bool = true
+  public var feed = [FeedItem]()
 
   public init(loader: FeedLoader) {
     self.loader = loader
   }
 
   public func refresh() async throws {
-    _ = try await loader.load()
+    feed = try await loader.load()
     showLoadingIndicator = false
   }
 }
