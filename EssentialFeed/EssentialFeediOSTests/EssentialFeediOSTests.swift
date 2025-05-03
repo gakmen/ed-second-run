@@ -24,18 +24,12 @@ class EssentialFeediOSXCTests: XCTestCase {
     XCTAssertEqual(loader.loadCallCount, 3)
   }
 
-  func test_loadingFeedIndicator_isVisibleOnlyWhileLoadingFeed() async throws {
-    var (sut, _) = makeSUT()
+  func test_loadingFeedIndicator_isInvisibleOnRefreshCompletion() async throws {
+    let (sut, _) = makeSUTOfModel()
 
-    let viewAppears = sut.on(\.onDidAppear) { view in
-      XCTAssertTrue(try isShowingLoadingIndicator(for: view))
-    }
-    let feedLoadingCompletes = sut.on(\.onFinishRefreshing) { view in
-      XCTAssertFalse(try isShowingLoadingIndicator(for: view))
-    }
-
-    ViewHosting.host(view: sut)
-    await fulfillment(of: [viewAppears, feedLoadingCompletes])
+    XCTAssertTrue(sut.showLoadingIndicator)
+    try await sut.refresh()
+    XCTAssertFalse(sut.showLoadingIndicator)
   }
 
   func test_loadFeedCompletion_rendersSuccessfullyLoadedFeed() async throws {
