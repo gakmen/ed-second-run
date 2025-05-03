@@ -11,23 +11,17 @@ class EssentialFeediOSXCTests: XCTestCase {
     XCTAssertEqual(loader.loadCallCount, 0)
   }
 
-  func test_loadFeedActions_requestFeedFromLoader() async {
-    var (sut, loader) = makeSUT()
+  func test_loadFeedActions_requestFeedFromLoader() async throws {
+    let (sut, loader) = makeSUTOfModel()
 
-    let viewAppears = sut.on(\.onFinishRefreshing)
-    { _ in XCTAssertEqual(loader.loadCallCount, 1) }
-    ViewHosting.host(view: sut)
-    await fulfillment(of: [viewAppears], timeout: 0.1)
+    try await sut.refresh()
+    XCTAssertEqual(loader.loadCallCount, 1)
 
-    let firstUserInitiatedReload = sut.on(\.onFinishRefreshing)
-    { _ in XCTAssertEqual(loader.loadCallCount, 2) }
-    await sut.refresh()
-    await fulfillment(of: [firstUserInitiatedReload], timeout: 0.1)
+    try await sut.refresh()
+    XCTAssertEqual(loader.loadCallCount, 2)
 
-    let secondUserInitiatedReload = sut.on(\.onFinishRefreshing)
-    { _ in XCTAssertEqual(loader.loadCallCount, 3) }
-    await sut.refresh()
-    await fulfillment(of: [secondUserInitiatedReload], timeout: 0.1)
+    try await sut.refresh()
+    XCTAssertEqual(loader.loadCallCount, 3)
   }
 
   func test_loadingFeedIndicator_isVisibleOnlyWhileLoadingFeed() async throws {

@@ -8,6 +8,10 @@ final public class FeedViewModel: ObservableObject {
   public init(loader: FeedLoader) {
     self.loader = loader
   }
+
+  public func refresh() async throws {
+    _ = try await loader.load()
+  }
 }
 
 public struct FeedView: View {
