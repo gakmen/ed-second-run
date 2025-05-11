@@ -4,7 +4,6 @@ import SwiftUI
 import ViewInspector
 import XCTest
 
-@MainActor
 class EssentialFeediOSXCTests: XCTestCase {
   func test_init_doesNotLoadFeed() {
     let (_, loader) = makeSUT()
