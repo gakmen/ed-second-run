@@ -29,6 +29,13 @@
 			remoteGlobalIDString = 7269371B2D69CF80006F3852;
 			remoteInfo = EssentialFeediOS;
 		};
+		72BA36882EA76588004B5A67 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 72E38E702D384B1C00469630 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 72E38E782D384B1C00469630;
+			remoteInfo = EssentialFeed;
+		};
 		72E38E832D384B1C00469630 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 72E38E702D384B1C00469630 /* Project object */;
@@ -209,6 +216,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				72BA36892EA76588004B5A67 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				7269371D2D69CF80006F3852 /* EssentialFeediOS */,
@@ -437,6 +445,12 @@
 			target = 7269371B2D69CF80006F3852 /* EssentialFeediOS */;
 			targetProxy = 726937252D69CF81006F3852 /* PBXContainerItemProxy */;
 		};
+		72BA36892EA76588004B5A67 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			platformFilter = ios;
+			target = 72E38E782D384B1C00469630 /* EssentialFeed */;
+			targetProxy = 72BA36882EA76588004B5A67 /* PBXContainerItemProxy */;
+		};
 		72E38E842D384B1C00469630 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 72E38E782D384B1C00469630 /* EssentialFeed */;
@@ -514,6 +528,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				WARNING_CFLAGS = "";
 			};
 			name = Debug;
 		};
@@ -552,6 +567,7 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
+				WARNING_CFLAGS = "";
 			};
 			name = Release;
 		};
@@ -611,7 +627,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				IPHONEOS_DEPLOYMENT_TARGET = "$(inherited)";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -650,7 +666,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				IPHONEOS_DEPLOYMENT_TARGET = "$(inherited)";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -724,6 +740,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 15.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -787,6 +804,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 15.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
