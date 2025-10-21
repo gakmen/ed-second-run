@@ -1,7 +1,6 @@
 import EssentialFeed
 import EssentialFeediOS
 import SwiftUI
-import ViewInspector
 import XCTest
 
 class EssentialFeediOSXCTests: XCTestCase {

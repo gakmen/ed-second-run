@@ -1,7 +1,6 @@
-import Combine
 import EssentialFeed
 
-final public class FeedViewModel: ObservableObject {
+final public class FeedViewModel {
   public var loader: FeedLoader
   public var showLoadingIndicator: Bool = true
   public var feed = [FeedItem]()
@@ -14,6 +13,7 @@ final public class FeedViewModel: ObservableObject {
     do {
       feed = try await loader.load()
     } catch {}
+      
     showLoadingIndicator = false
   }
 }
